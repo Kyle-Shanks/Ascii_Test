@@ -1,0 +1,25 @@
+body {
+    height: 100vh;
+    background-color: #cccccc;
+    font-family: 'Inconsolata', monospace;
+    font-size: 1.25rem;
+}
+
+#cnvContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 40rem;
+    width: 56rem;
+    box-shadow: 0 0 0 0.1875rem rgba(0,0,0,1), 1rem 1rem 0 0 rgba(0,0,0,0.1);
+}
+
+#cnv {
+    height: 100%;
+    width: 100%;
+}
+
+@media screen and (max-width: 1000px) {
+    .canvas-container { height: 30rem; width: 42rem; }
+}
