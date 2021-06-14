@@ -1,0 +1,19 @@
+{
+  "name": "ascii_test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "KJ Shanks <kyle.j.shanks@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "tscw": "tsc --watch",
+    "build": "webpack --mode=production",
+    "start": "webpack --watch --mode=development"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.2",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.2"
+  }
+}
