@@ -1,4 +1,4 @@
 // Canvas globals
-export const CNV = <HTMLCanvasElement> document.getElementById('cnv')
-export const CTX = CNV.getContext('2d')
-export const CONTAINER = <HTMLDivElement> document.getElementById('cnvContainer')
+export const CNV = document.getElementById('cnv') as HTMLCanvasElement
+export const CTX = CNV.getContext('2d') as CanvasRenderingContext2D
+export const CONTAINER = document.getElementById('cnvContainer') as HTMLDivElement

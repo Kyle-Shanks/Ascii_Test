@@ -1,7 +1,7 @@
 body {
     height: 100vh;
     background-color: #cccccc;
-    font-family: 'Inconsolata', monospace;
+    font-family: monospace;
     font-size: 1.25rem;
 }
 
@@ -21,5 +21,5 @@ body {
 }
 
 @media screen and (max-width: 1000px) {
-    .canvas-container { height: 30rem; width: 42rem; }
+    #cnvContainer { height: 30rem; width: 42rem; }
 }

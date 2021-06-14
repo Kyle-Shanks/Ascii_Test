@@ -12,6 +12,7 @@ interface ThemeColors {
     pop: string,
 }
 
+// TODO: Make class or singleton or something to hold function to update theme and provide theme
 const THEME: Record<Theme, ThemeColors> = {
     [Theme.DARK]: {
         background: '#2a303c',
