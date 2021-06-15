@@ -1,6 +1,7 @@
 import { CNV, CTX } from './globals'
 import THEME from './theme'
 import Text from './text'
+import Input from './input'
 
 const dot = '·'
 
@@ -9,6 +10,8 @@ console.log({
     dark: THEME['Dark']
 })
 
+const INPUT = new Input()
+INPUT.listen()
 
 // draw test dot grid from Text
 for (let i = 50; i < CNV.width; i += 100 ) {
