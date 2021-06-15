@@ -1,31 +1,30 @@
-import { CNV, CTX } from './globals'
-import THEME from './theme'
+import { CNV, CTX, INPUT, THEME_MANAGER } from './globals'
 import Text from './text'
-import Input from './input'
 
 const dot = '·'
 
 console.log({
     CNV,
-    dark: THEME['Dark']
+    colors: THEME_MANAGER.getColors()
 })
 
-const INPUT = new Input()
 INPUT.listen()
 
 // draw test dot grid from Text
-for (let i = 50; i < CNV.width; i += 100 ) {
-    for (let j = 50; j < CNV.height; j += 100) {
-        const text = new Text({
-            pos: { x: i, y: j },
-            msg: dot,
-            size: 100
-        })
-        text.draw()
+const drawDotGrid = (size = 50) => {
+    for (let i = (size / 2); i < CNV.width; i += size) {
+        for (let j = (size / 2); j < CNV.height; j += size) {
+            const text = new Text({
+                pos: { x: i, y: j },
+                msg: dot,
+                size: size
+            })
+            text.draw()
+        }
     }
 }
 
-const drawGrid = (gridSize = 100) => {
+const drawGrid = (gridSize = 50) => {
     CTX.lineWidth = 4
     CTX.strokeStyle = '#aaaaaa'
 
@@ -46,4 +45,7 @@ const drawGrid = (gridSize = 100) => {
     }
 }
 
-drawGrid()
+const testSize = 50
+
+drawGrid(testSize)
+drawDotGrid(testSize)
