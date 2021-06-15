@@ -1,48 +1,60 @@
-const inputKeys = ['w', 'a', 's', 'd', 'j', 'k', 'shift', 'space'] as const
-type InputKeys = (typeof inputKeys)[number] // Get union type from const
+const InputKeys = {
+    W: 'w',
+    A: 'a',
+    S: 's',
+    D: 'd',
+    J: 'j',
+    K: 'k',
+    Shift: 'Shift',
+    Space: ' ',
+} as const
+
+type InputKeys = keyof typeof InputKeys
 
 class Input {
     readonly keys: Record<InputKeys, boolean> = {
-        w: false,
-        a: false,
-        s: false,
-        d: false,
-        j: false,
-        k: false,
-        shift: false,
-        space: false,
+        W: false,
+        A: false,
+        S: false,
+        D: false,
+        J: false,
+        K: false,
+        Shift: false,
+        Space: false,
     }
 
-    getKeys = () => this.keys
+    constructor() {}
+
+    public getKeys = () => this.keys
 
     private keydownHandler = (e: KeyboardEvent) => {
         if (e.repeat) return
         e.preventDefault()
 
         switch (e.key) {
-            case 'w':
-                this.keys.w = true
+            case InputKeys.W:
+                this.keys.W = true
                 break
-            case 'a':
-                this.keys.a = true
+            case InputKeys.A:
+                this.keys.A = true
                 break
-            case 's':
-                this.keys.s = true
+            case InputKeys.S:
+                this.keys.D = true
                 break
-            case 'd':
-                this.keys.d = true
+            case InputKeys.D:
+                this.keys.D = true
                 break
-            case 'j':
-                this.keys.j = true
+            case InputKeys.J:
+                this.keys.J = true
                 break
-            case 'k':
-                this.keys.k = true
+            case InputKeys.K:
+                this.keys.K = true
                 break
-            case 'Shift':
-                this.keys.shift = true
+            case InputKeys.Shift:
+                this.keys.Shift = true
                 break
-            case ' ':
-                this.keys.space = true
+            case InputKeys.Space:
+                this.keys.Space = true
                 break
         }
     }
@@ -51,40 +63,39 @@ class Input {
         e.preventDefault()
 
         switch (e.key) {
-            case 'w':
-                this.keys.w = false
+            case InputKeys.W:
+                this.keys.W = false
                 break
-            case 'a':
-                this.keys.a = false
+            case InputKeys.A:
+                this.keys.A = false
                 break
-            case 's':
-                this.keys.s = false
+            case InputKeys.S:
+                this.keys.D = false
                 break
-            case 'd':
-                this.keys.d = false
+            case InputKeys.D:
+                this.keys.D = false
                 break
-            case 'j':
-                this.keys.j = false
+            case InputKeys.J:
+                this.keys.J = false
                 break
-            case 'k':
-                this.keys.k = false
+            case InputKeys.K:
+                this.keys.K = false
                 break
-            case 'Shift':
-                this.keys.shift = false
+            case InputKeys.Shift:
+                this.keys.Shift = false
                 break
-            case ' ':
-                this.keys.space = false
+            case InputKeys.Space:
+                this.keys.Space = false
                 break
         }
     }
 
-    constructor() {}
-
-    listen = () => {
+    public listen = () => {
         document.addEventListener('keydown', this.keydownHandler)
         document.addEventListener('keyup', this.keyupHandler)
     }
-    stop = () => {
+
+    public stop = () => {
         document.removeEventListener('keydown', this.keydownHandler)
         document.removeEventListener('keyup', this.keyupHandler)
     }
