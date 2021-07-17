@@ -1,32 +1,45 @@
-import { CNV, CTX, INPUT, THEME_MANAGER } from './globals'
-import Text from './text'
+import { CHARS, GRID_SIZE } from './constants'
+import { CNV, CTX, INPUT, PLAYER, THEME_MANAGER } from './globals'
+import { InputEvent, InputObserver } from './input'
+import Entity from './entity'
+import { THEME_COLOR } from './theme'
 
-const dot = '·'
+// draw background
+const drawBackground = () => {
+    CTX.fillStyle = THEME_MANAGER.getColors().background
+    CTX.fillRect(0, 0, CNV.width, CNV.height)
+}
 
-console.log({
-    CNV,
-    colors: THEME_MANAGER.getColors()
-})
-
-INPUT.listen()
-
-// draw test dot grid from Text
-const drawDotGrid = (size = 50) => {
-    for (let i = (size / 2); i < CNV.width; i += size) {
-        for (let j = (size / 2); j < CNV.height; j += size) {
-            const text = new Text({
-                pos: { x: i, y: j },
-                msg: dot,
-                size: size
+// draw test dot grid from Entity
+// const drawDotGrid = (gridSize = GRID_SIZE) => {
+//     for (let i = (gridSize / 2); i < CNV.width; i += gridSize) {
+//         for (let j = (gridSize / 2); j < CNV.height; j += gridSize) {
+//             const entity = new Entity({
+//                 position: { x: i, y: j },
+//                 char: CHARS.DOT,
+//                 color: THEME_COLOR.LOW
+//             })
+//             entity.draw()
+//         }
+//     }
+// }
+const drawDotGrid = (gridSize = GRID_SIZE) => {
+    for (let i = gridSize; i < CNV.width; i += gridSize) {
+        for (let j = gridSize; j < CNV.height; j += gridSize) {
+            const entity = new Entity({
+                position: { x: i, y: j },
+                char: CHARS.DOT,
+                color: THEME_COLOR.LOW
             })
-            text.draw()
+            entity.draw()
         }
     }
 }
 
-const drawGrid = (gridSize = 50) => {
-    CTX.lineWidth = 4
-    CTX.strokeStyle = '#aaaaaa'
+// Draw grid lines
+const drawGrid = (gridSize = GRID_SIZE) => {
+    CTX.lineWidth = 2
+    CTX.strokeStyle = THEME_MANAGER.getColors().low
 
     // vertical lines
     for (let i = gridSize; i < CNV.width; i += gridSize) {
@@ -45,7 +58,41 @@ const drawGrid = (gridSize = 50) => {
     }
 }
 
-const testSize = 50
+const draw = () => {
+    drawBackground()
+    drawGrid(GRID_SIZE)
+    drawDotGrid(GRID_SIZE)
 
-drawGrid(testSize)
-drawDotGrid(testSize)
+    // PLAYER.handleInput(INPUT.getKeys())
+    PLAYER.updatePosition()
+    PLAYER.draw()
+
+    requestAnimationFrame(draw)
+}
+
+// draw()
+
+// -------------------------------------------------------
+
+class InputWatcher implements InputObserver {
+    readonly id = 'inputWatcher1'
+
+    update = (event: InputEvent) => {
+        // console.log({ event, keys: INPUT.getKeys() })
+
+        drawBackground()
+        drawDotGrid(GRID_SIZE)
+
+        PLAYER.handleInput(event)
+        PLAYER.updatePosition()
+        PLAYER.draw()
+    }
+}
+
+const inputWatcher = new InputWatcher()
+INPUT.subscribe(inputWatcher)
+INPUT.listen()
+
+drawBackground()
+drawDotGrid(GRID_SIZE)
+PLAYER.draw()

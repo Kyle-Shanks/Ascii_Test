@@ -1,28 +1,32 @@
-const Theme = {
+const THEME = {
     LIGHT: 'Light',
     DARK: 'Dark',
 } as const
 
-type Theme = typeof Theme[keyof typeof Theme]
+type Theme = typeof THEME[keyof typeof THEME]
 
-interface ThemeColors {
-    background: string,
-    low: string,
-    high: string,
-    pop: string,
-}
+export const THEME_COLOR = {
+    BACKGROUND: 'background',
+    LOW: 'low',
+    HIGH: 'high',
+    POP: 'pop',
+} as const
+
+export type ThemeColor = typeof THEME_COLOR[keyof typeof THEME_COLOR]
+
+type ThemeColors = Record<ThemeColor, string>
 
 class ThemeManager {
     public currentTheme: Theme
 
     private themeMap: Record<Theme, ThemeColors> = {
-        [Theme.DARK]: {
+        [THEME.DARK]: {
             background: '#2a303c',
             low: '#464e5f',
             high: '#e2e8f0',
             pop: '#4ca2a1',
         },
-        [Theme.LIGHT]: {
+        [THEME.LIGHT]: {
             background: '#ffffff',
             low: '#cbd5e0',
             high: '#2d3748',
@@ -30,7 +34,7 @@ class ThemeManager {
         },
     }
 
-    constructor(initTheme: Theme = Theme.DARK) {
+    constructor(initTheme: Theme = THEME.DARK) {
         this.currentTheme = initTheme
     }
 
