@@ -1,9 +1,9 @@
 import Actor, { ActorProps } from 'src/classes/actor'
 import { InputEvent } from 'src/classes/input'
+import Map from 'src/classes/map'
 import { ThemeColor, THEME_COLOR } from 'src/classes/theme'
 import { CHARS, EntityChar, GRID_SIZE } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
-
 interface PlayerProps extends ActorProps {
     // Any player specific props go here
 }
@@ -19,7 +19,7 @@ class Player extends Actor {
         this.position = props.position
     }
 
-    update = (event: InputEvent, wallMap: number[][]) => {
+    update = (event: InputEvent, map: Map) => {
         if (event.type === 'press') {
             let dir: Vector2 | null = null
             switch (event.key) {
@@ -40,7 +40,7 @@ class Player extends Actor {
                     break
             }
 
-            if (dir) this._updatePosition(dir, wallMap)
+            if (dir) this._updatePosition(dir, map)
         } else if (event.type === 'release') {
             switch (event.key) {
                 case 'Shift':
@@ -50,10 +50,10 @@ class Player extends Actor {
         }
     }
 
-    private _updatePosition = (vec: Vector2, wallMap: number[][]) => {
+    private _updatePosition = (vec: Vector2, map: Map) => {
         const newPosition = this.position.add(vec)
         // Check if outside grid or if a wall is at the new position
-        if (newPosition.isOutsideGrid() || wallMap[newPosition.y]?.[newPosition.x]) return
+        if (newPosition.isOutsideGrid() || !map.isPositionEmpty(newPosition)) return
         this.position = newPosition
     }
 }
