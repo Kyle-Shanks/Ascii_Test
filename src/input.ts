@@ -6,7 +6,7 @@ const InputKey = {
     D: 'd',
     J: 'j',
     K: 'k',
-    Shift: 'Shift',
+    Shift: 'shift',
     Space: ' ',
 } as const
 
@@ -97,7 +97,7 @@ class Input implements BaseInput {
         if (e.repeat) return
         e.preventDefault()
 
-        switch (e.key) {
+        switch (e.key.toLowerCase()) {
             case InputKey.W:
                 this._handleKeyDown('W')
                 break
@@ -128,7 +128,7 @@ class Input implements BaseInput {
     private keyupHandler = (e: KeyboardEvent) => {
         e.preventDefault()
 
-        switch (e.key) {
+        switch (e.key.toLowerCase()) {
             case InputKey.W:
                 this._handleKeyUp('W')
                 break

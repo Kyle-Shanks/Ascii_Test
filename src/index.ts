@@ -1,8 +1,12 @@
-import { CHARS, GRID_SIZE } from './constants'
-import { CNV, CTX, INPUT, PLAYER, THEME_MANAGER } from './globals'
-import { InputEvent, InputObserver } from './input'
 import Entity from './entity'
+import Player from './player'
+import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE } from './constants'
+import { INPUT, THEME_MANAGER } from './globals'
+import { InputEvent, InputObserver } from './input'
 import { THEME_COLOR } from './theme'
+import { Vector2 } from './types'
+
+const PLAYER = new Player({ position: new Vector2(3, 3) })
 
 // draw background
 const drawBackground = () => {
@@ -10,28 +14,15 @@ const drawBackground = () => {
     CTX.fillRect(0, 0, CNV.width, CNV.height)
 }
 
-// draw test dot grid from Entity
-// const drawDotGrid = (gridSize = GRID_SIZE) => {
-//     for (let i = (gridSize / 2); i < CNV.width; i += gridSize) {
-//         for (let j = (gridSize / 2); j < CNV.height; j += gridSize) {
-//             const entity = new Entity({
-//                 position: { x: i, y: j },
-//                 char: CHARS.DOT,
-//                 color: THEME_COLOR.LOW
-//             })
-//             entity.draw()
-//         }
-//     }
-// }
+// draw dot grid
 const drawDotGrid = (gridSize = GRID_SIZE) => {
-    for (let i = gridSize; i < CNV.width; i += gridSize) {
-        for (let j = gridSize; j < CNV.height; j += gridSize) {
-            const entity = new Entity({
-                position: { x: i, y: j },
-                char: CHARS.DOT,
-                color: THEME_COLOR.LOW
-            })
-            entity.draw()
+    for (let i = GRID_PAD; i <= CNV.width - GRID_PAD; i += gridSize) {
+        for (let j = GRID_PAD; j <= CNV.height - GRID_PAD; j += gridSize) {
+            CTX.fillStyle = THEME_MANAGER.getColors()[THEME_COLOR.LOW]
+            CTX.font = `${gridSize}px Andale Mono`
+            CTX.textAlign = 'center'
+            CTX.textBaseline = 'middle'
+            CTX.fillText(CHARS.DOT, i, j)
         }
     }
 }
@@ -58,34 +49,65 @@ const drawGrid = (gridSize = GRID_SIZE) => {
     }
 }
 
-const draw = () => {
-    drawBackground()
-    drawGrid(GRID_SIZE)
-    drawDotGrid(GRID_SIZE)
+// -------------------------------------------------------
+const _ = 0
+const wallMap = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,_,_,_,_,_,_,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,_,_,_,_,_,_,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,_,_,_,_,_,_,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,_,_,_,_,_,_,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,_,_,_,_,_,_,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,_,_,_,_,_,_,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,1,1,1,1,1,_,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,1,1,1,1,1,1,1,1,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+]
+// -------------------------------------------------------
 
-    // PLAYER.handleInput(INPUT.getKeys())
-    PLAYER.updatePosition()
-    PLAYER.draw()
-
-    requestAnimationFrame(draw)
+const wallArr: Entity[] = []
+for (let i = 0; i < wallMap.length; i++) {
+    for (let j = 0; j < wallMap[i].length; j++) {
+        if (wallMap[i][j]) {
+            wallArr.push(
+                new Entity({ position: new Vector2(j, i) })
+            )
+        }
+    }
 }
 
-// draw()
-
-// -------------------------------------------------------
+const draw = () => {
+    drawBackground()
+    drawDotGrid(GRID_SIZE)
+    wallArr.forEach((wall) => wall.draw())
+    PLAYER.draw()
+}
 
 class InputWatcher implements InputObserver {
     readonly id = 'inputWatcher1'
 
     update = (event: InputEvent) => {
-        // console.log({ event, keys: INPUT.getKeys() })
-
-        drawBackground()
-        drawDotGrid(GRID_SIZE)
-
-        PLAYER.handleInput(event)
-        PLAYER.updatePosition()
-        PLAYER.draw()
+        PLAYER.update(event, wallMap)
+        draw()
     }
 }
 
@@ -93,6 +115,4 @@ const inputWatcher = new InputWatcher()
 INPUT.subscribe(inputWatcher)
 INPUT.listen()
 
-drawBackground()
-drawDotGrid(GRID_SIZE)
-PLAYER.draw()
+draw()

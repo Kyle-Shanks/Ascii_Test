@@ -1,14 +1,15 @@
-import Actor, { ActorProps } from "./actor";
-import { CHARS, EntityChar, GRID_SIZE, Position } from "./constants";
-import { InputEvent, InputState } from "./input";
-import { ThemeColor, THEME_COLOR } from "./theme";
+import Actor, { ActorProps } from './actor'
+import { CHARS, EntityChar, GRID_SIZE } from './constants'
+import { InputEvent } from './input'
+import { ThemeColor, THEME_COLOR } from './theme'
+import { Vector2 } from './types'
 
 interface PlayerProps extends ActorProps {
     // Any player specific props go here
 }
 
 class Player extends Actor {
-    position: Position
+    position: Vector2
     char: EntityChar = CHARS.AT
     size: number = GRID_SIZE
     color: ThemeColor = THEME_COLOR.POP
@@ -18,20 +19,42 @@ class Player extends Actor {
         this.position = props.position
     }
 
-    handleInput = (event: InputEvent) => {
-        // Handle input things
+    update = (event: InputEvent, wallMap: number[][]) => {
         if (event.type === 'press') {
+            let dir: Vector2 | null = null
             switch (event.key) {
-                case 'W': this.position.y -= GRID_SIZE; break;
-                case 'A': this.position.x -= GRID_SIZE; break;
-                case 'S': this.position.y += GRID_SIZE; break;
-                case 'D': this.position.x += GRID_SIZE; break;
+                case 'W':
+                    dir = Vector2.UP
+                    break
+                case 'A':
+                    dir = Vector2.LEFT
+                    break
+                case 'S':
+                    dir = Vector2.DOWN
+                    break
+                case 'D':
+                    dir = Vector2.RIGHT
+                    break
+                case 'Shift':
+                    this.color = THEME_COLOR.HIGH
+                    break
+            }
+
+            if (dir) this._updatePosition(dir, wallMap)
+        } else if (event.type === 'release') {
+            switch (event.key) {
+                case 'Shift':
+                    this.color = THEME_COLOR.POP
+                    break
             }
         }
     }
 
-    updatePosition = () => {
-        // Do the things
+    private _updatePosition = (vec: Vector2, wallMap: number[][]) => {
+        const newPosition = this.position.add(vec)
+        // Check if outside grid or if a wall is at the new position
+        if (newPosition.isOutsideGrid() || wallMap[newPosition.y]?.[newPosition.x]) return
+        this.position = newPosition
     }
 }
 
