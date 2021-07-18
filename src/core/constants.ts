@@ -23,3 +23,19 @@ export const CHARS = {
 } as const
 
 export type EntityChar = typeof CHARS[keyof typeof CHARS]
+
+export const ENTITY_TYPES = {
+    DEFAULT: 'Entity',
+    ACTOR: 'Actor',
+    PLAYER: 'Player',
+    WALL: 'Wall',
+} as const
+
+export type EntityType = typeof ENTITY_TYPES[keyof typeof ENTITY_TYPES]
+
+export const TYPE_CHAR_MAP: Record<EntityType, EntityChar> = {
+    [ENTITY_TYPES.ACTOR]: CHARS.DOLLAR,
+    [ENTITY_TYPES.DEFAULT]: CHARS.QUESTION,
+    [ENTITY_TYPES.PLAYER]: CHARS.AT,
+    [ENTITY_TYPES.WALL]: CHARS.HASH,
+} as const

@@ -1,25 +1,27 @@
 import { THEME_COLOR, ThemeColor } from 'src/classes/theme'
-import { CTX, CHARS, EntityChar, GRID_PAD, GRID_SIZE } from 'src/core/constants'
+import { CTX, ENTITY_TYPES, EntityType, GRID_PAD, GRID_SIZE, TYPE_CHAR_MAP } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
 import { THEME_MANAGER } from 'src/globals'
 
 export type EntityProps = {
-    position: Vector2
-    char?: EntityChar
     color?: ThemeColor
+    position: Vector2
+    size?: number
+    type?: EntityType
 }
 
 // - Entity Class -
 class Entity {
-    position: Vector2
-    char: EntityChar = CHARS.HASH
-    size: number = GRID_SIZE
     color: ThemeColor = THEME_COLOR.HIGH
+    position: Vector2
+    size: number = GRID_SIZE
+    type: EntityType = ENTITY_TYPES.DEFAULT
 
     constructor(props: EntityProps) {
-        this.position = props.position
-        this.char = props.char ?? this.char
         this.color = props.color ?? this.color
+        this.position = props.position
+        this.size = props.size ?? this.size
+        this.type = props.type ?? this.type
     }
 
     draw = () => {
@@ -29,7 +31,7 @@ class Entity {
         CTX.font = `${this.size}px Andale Mono`
         CTX.textAlign = 'center'
         CTX.textBaseline = 'middle'
-        CTX.fillText(this.char, drawPos.x + GRID_PAD, drawPos.y + GRID_PAD)
+        CTX.fillText(TYPE_CHAR_MAP[this.type], drawPos.x + GRID_PAD, drawPos.y + GRID_PAD)
     }
 
     isCollided = (entity: Entity): boolean => (

@@ -1,22 +1,18 @@
-import Actor, { ActorProps } from 'src/classes/actor'
+import Actor, { ActorProps } from 'src/classes/entities/actor'
 import { InputEvent } from 'src/classes/input'
 import Map from 'src/classes/map'
-import { ThemeColor, THEME_COLOR } from 'src/classes/theme'
-import { CHARS, EntityChar, GRID_SIZE } from 'src/core/constants'
+import { THEME_COLOR } from 'src/classes/theme'
+import { ENTITY_TYPES } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
+
 interface PlayerProps extends ActorProps {
     // Any player specific props go here
 }
 
 class Player extends Actor {
-    position: Vector2
-    char: EntityChar = CHARS.AT
-    size: number = GRID_SIZE
-    color: ThemeColor = THEME_COLOR.POP
-
     constructor(props: PlayerProps) {
         super(props)
-        this.position = props.position
+        this.type = ENTITY_TYPES.PLAYER
     }
 
     update = (event: InputEvent, map: Map) => {

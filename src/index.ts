@@ -1,6 +1,6 @@
 import { InputEvent, InputObserver } from 'src/classes/input'
 import Map from 'src/classes/map'
-import Player from 'src/classes/player'
+import Player from 'src/classes/entities/player'
 import { THEME_COLOR } from 'src/classes/theme'
 import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE } from 'src/core/constants'
 import mapData from 'src/core/mapData'
@@ -16,7 +16,7 @@ const drawBackground = () => {
     CTX.fillRect(0, 0, CNV.width, CNV.height)
 }
 
-// draw dot grid
+// Draw dot grid
 const drawDotGrid = (gridSize = GRID_SIZE) => {
     for (let i = GRID_PAD; i <= CNV.width - GRID_PAD; i += gridSize) {
         for (let j = GRID_PAD; j <= CNV.height - GRID_PAD; j += gridSize) {
@@ -53,7 +53,7 @@ const drawGrid = (gridSize = GRID_SIZE) => {
 
 const draw = () => {
     drawBackground()
-    drawDotGrid(GRID_SIZE)
+    drawDotGrid()
     MAP.draw()
     PLAYER.draw()
 }
@@ -71,4 +71,5 @@ const inputWatcher = new InputWatcher()
 INPUT.subscribe(inputWatcher)
 INPUT.listen()
 
+// Initial Draw
 draw()
