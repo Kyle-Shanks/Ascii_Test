@@ -1,4 +1,4 @@
-import { CNV, GRID_PAD, GRID_SIZE } from './constants'
+import { CNV, GRID_PAD, GRID_SIZE } from 'src/core/constants'
 
 // Common types
 export class Vector2 {

@@ -1,7 +1,7 @@
-import { CHARS, EntityChar, GRID_SIZE } from './constants'
-import Entity, { EntityProps } from './entity'
-import { ThemeColor, THEME_COLOR } from './theme'
-import { Vector2 } from './types'
+import Entity, { EntityProps } from 'src/classes/entity'
+import { ThemeColor, THEME_COLOR } from 'src/classes/theme'
+import { CHARS, EntityChar, GRID_SIZE } from 'src/core/constants'
+import { Vector2 } from 'src/core/types'
 
 export interface ActorProps extends EntityProps {
     // Any actor specific props go here

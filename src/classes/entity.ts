@@ -1,7 +1,7 @@
-import { CTX, CHARS, EntityChar, GRID_PAD, GRID_SIZE } from './constants'
-import { THEME_MANAGER } from './globals'
-import { THEME_COLOR, ThemeColor } from './theme'
-import { Vector2 } from './types'
+import { THEME_COLOR, ThemeColor } from 'src/classes/theme'
+import { CTX, CHARS, EntityChar, GRID_PAD, GRID_SIZE } from 'src/core/constants'
+import { Vector2 } from 'src/core/types'
+import { THEME_MANAGER } from 'src/globals'
 
 export type EntityProps = {
     position: Vector2

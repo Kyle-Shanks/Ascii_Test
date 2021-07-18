@@ -1,8 +1,8 @@
-import Actor, { ActorProps } from './actor'
-import { CHARS, EntityChar, GRID_SIZE } from './constants'
-import { InputEvent } from './input'
-import { ThemeColor, THEME_COLOR } from './theme'
-import { Vector2 } from './types'
+import Actor, { ActorProps } from 'src/classes/actor'
+import { InputEvent } from 'src/classes/input'
+import { ThemeColor, THEME_COLOR } from 'src/classes/theme'
+import { CHARS, EntityChar, GRID_SIZE } from 'src/core/constants'
+import { Vector2 } from 'src/core/types'
 
 interface PlayerProps extends ActorProps {
     // Any player specific props go here

@@ -1,3 +1,4 @@
+// Grid Constants
 export const GRID_SIZE = 30
 export const GRID_PAD = GRID_SIZE
 

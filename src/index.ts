@@ -1,10 +1,10 @@
-import Entity from './entity'
-import Player from './player'
-import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE } from './constants'
-import { INPUT, THEME_MANAGER } from './globals'
-import { InputEvent, InputObserver } from './input'
-import { THEME_COLOR } from './theme'
-import { Vector2 } from './types'
+import Entity from 'src/classes/entity'
+import Player from 'src/classes/player'
+import { InputEvent, InputObserver } from 'src/classes/input'
+import { THEME_COLOR } from 'src/classes/theme'
+import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE } from 'src/core/constants'
+import { Vector2 } from 'src/core/types'
+import { INPUT, THEME_MANAGER } from 'src/globals'
 
 const PLAYER = new Player({ position: new Vector2(3, 3) })
 
