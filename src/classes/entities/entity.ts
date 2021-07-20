@@ -1,7 +1,7 @@
 import { THEME_COLOR, ThemeColor } from 'src/classes/theme'
 import { CTX, ENTITY_TYPES, EntityType, GRID_PAD, GRID_SIZE, TYPE_CHAR_MAP } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
-import { THEME_MANAGER } from 'src/globals'
+import { CAMERA, THEME_MANAGER } from 'src/globals'
 
 export type EntityProps = {
     color?: ThemeColor
@@ -25,13 +25,20 @@ class Entity {
     }
 
     draw = () => {
-        if (this.position.isOutsideGrid()) return
-        const drawPos = this.position.multiply(GRID_SIZE)
+        const viewedPosition = this.position.subtract(CAMERA.position)
+
+        if (viewedPosition.isOutsideGrid()) return
+        const drawPos = viewedPosition.multiply(GRID_SIZE)
+
         CTX.fillStyle = THEME_MANAGER.getColors()[this.color]
         CTX.font = `${this.size}px Andale Mono`
         CTX.textAlign = 'center'
         CTX.textBaseline = 'middle'
         CTX.fillText(TYPE_CHAR_MAP[this.type], drawPos.x + GRID_PAD, drawPos.y + GRID_PAD)
+    }
+
+    setPosition = (pos: Vector2) => {
+        this.position = pos
     }
 
     isCollided = (entity: Entity): boolean => (

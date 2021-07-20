@@ -5,7 +5,7 @@ import { THEME_COLOR } from 'src/classes/theme'
 import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE } from 'src/core/constants'
 import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
-import { INPUT, THEME_MANAGER } from 'src/globals'
+import { CAMERA, INPUT, THEME_MANAGER } from 'src/globals'
 
 const PLAYER = new Player({ position: new Vector2(3, 3) })
 const MAP = new Map(mapData[0])
@@ -58,11 +58,14 @@ const draw = () => {
     PLAYER.draw()
 }
 
+const cameraOffset = new Vector2(19, 14)
+
 class InputWatcher implements InputObserver {
     readonly id = 'inputWatcher1'
 
     update = (event: InputEvent) => {
         PLAYER.update(event, MAP)
+        if (event.type === 'press') CAMERA.updatePosition(PLAYER.position.subtract(cameraOffset))
         draw()
     }
 }
@@ -72,4 +75,5 @@ INPUT.subscribe(inputWatcher)
 INPUT.listen()
 
 // Initial Draw
+CAMERA.updatePosition(PLAYER.position.subtract(cameraOffset))
 draw()

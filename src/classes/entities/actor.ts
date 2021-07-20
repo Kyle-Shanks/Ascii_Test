@@ -7,7 +7,7 @@ export interface ActorProps extends EntityProps {
 }
 
 class Actor extends Entity {
-    updatePosition!: {(): void}
+    update!: Function
 
     constructor(props: ActorProps) {
         super(props)
