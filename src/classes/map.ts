@@ -10,6 +10,9 @@ class Map {
     title: string
     data: MapData
     entities: Entity[]
+    objects: Entity[]
+    solids: Entity[]
+    opaques: Entity[]
     startPosition: Vector2
     seenMap: Record<string, boolean>
 
@@ -18,9 +21,14 @@ class Map {
         this.data = info.data
         this.height = info.data.length
         this.width = info.data[0].length
-        this.entities = this._getEntities()
         this.startPosition = info.startPosition
         this.seenMap = {}
+
+        this.entities = []
+        this.objects = []
+        this.solids = []
+        this.opaques = []
+        this._getEntities()
     }
 
     draw = (lightMap: Record<string, boolean>) => {
@@ -42,36 +50,31 @@ class Map {
     isPositionEmpty = (pos: Vector2): boolean => {
         if (this.isPositionOutsideMap(pos)) {
             console.error('Position is outside the map')
-            return false
+            return true
         }
         return this.data[pos.y][pos.x] === null
     }
 
-    private _getEntities = (): Entity[] => {
-        const arr: Entity[] = []
+    getAtPosition = (pos: Vector2): Entity | null => {
+        if (this.isPositionEmpty(pos)) return null
+        return this.objects.find((entity) => entity.position.isEqual(pos)) || null
+    }
+
+    private _getEntities = () => {
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
                 const num = this.data[i][j]
-                if (num !== null) {
-                    arr.push(
-                        new Entity({
-                            position: new Vector2(j, i),
-                            type: MapNumMap[num],
-                        })
-                    )
-                } else {
-                    arr.push(
-                        new Entity({
-                            position: new Vector2(j, i),
-                            type: ENTITY_TYPES.DOT,
-                            // color: THEME_COLOR.LOW
-                        })
-                    )
-                }
+                const entity = new Entity({
+                    position: new Vector2(j, i),
+                    type: num === null ? ENTITY_TYPES.DOT : MapNumMap[num]
+                })
+
+                this.entities.push(entity)
+                if (num !== null) this.objects.push(entity)
+                if (entity.isSolid()) this.solids.push(entity)
+                if (entity.isOpaque()) this.opaques.push(entity)
             }
         }
-
-        return arr
     }
 }
 

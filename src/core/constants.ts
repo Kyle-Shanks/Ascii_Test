@@ -10,6 +10,9 @@ export const CONTAINER = document.getElementById('cnvContainer') as HTMLDivEleme
 // Entity Characters
 export const CHARS = {
     DOT:      '·',
+    COMMA:    ',',
+    SEMI:     ';',
+    COLON:    ':',
     AT:       '@',
     HASH:     '#',
     DOLLAR:   '$',
@@ -17,9 +20,12 @@ export const CHARS = {
     TILDE:    '~',
     PERIOD:   '.',
     QUESTION: '?',
+    EXCLAM:   '!',
     PLUS:     '+',
     DASH:     '-',
     PIPE:     '|',
+    UP:       '^',
+    DOWN:     'v',
 } as const
 
 export type EntityChar = typeof CHARS[keyof typeof CHARS]
@@ -30,14 +36,8 @@ export const ENTITY_TYPES = {
     PLAYER: 'Player',
     WALL: 'Wall',
     DOT: 'Dot',
+    DOOR: 'Door',
+    PORTAL: 'Portal',
 } as const
 
 export type EntityType = typeof ENTITY_TYPES[keyof typeof ENTITY_TYPES]
-
-export const TYPE_CHAR_MAP: Record<EntityType, EntityChar> = {
-    [ENTITY_TYPES.ACTOR]: CHARS.DOLLAR,
-    [ENTITY_TYPES.DEFAULT]: CHARS.QUESTION,
-    [ENTITY_TYPES.PLAYER]: CHARS.AT,
-    [ENTITY_TYPES.WALL]: CHARS.HASH,
-    [ENTITY_TYPES.DOT]: CHARS.DOT,
-} as const

@@ -7,7 +7,7 @@ import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, INPUT, THEME_MANAGER } from 'src/globals'
 
-const MAP = new Map(mapData[1])
+const MAP = new Map(mapData[0])
 const PLAYER = new Player({ position: MAP.startPosition})
 
 // draw background
@@ -75,7 +75,10 @@ const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
                 lightMap[`${start.x},${start.y}`] = true
             }
 
-            if (start.isEqual(vec) || !MAP.isPositionEmpty(start)) break
+            const entityAtPosition = MAP.getAtPosition(start)
+            if (entityAtPosition !== null && entityAtPosition.isOpaque()) break
+            if (start.isEqual(vec)) break
+
             const err2 = err * 2
 
             if (err2 > -dy) {

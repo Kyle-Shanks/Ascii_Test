@@ -11,7 +11,6 @@ class Actor extends Entity {
 
     constructor(props: ActorProps) {
         super(props)
-        this.color = props.color ?? THEME_COLOR.POP
         this.type = ENTITY_TYPES.ACTOR
     }
 }

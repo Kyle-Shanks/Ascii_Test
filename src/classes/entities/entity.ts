@@ -1,26 +1,72 @@
 import { THEME_COLOR, ThemeColor } from 'src/classes/theme'
-import { CNV, CTX, ENTITY_TYPES, EntityType, GRID_PAD, GRID_SIZE, TYPE_CHAR_MAP } from 'src/core/constants'
+import { CNV, CTX, CHARS, EntityChar, ENTITY_TYPES, EntityType, GRID_PAD, GRID_SIZE } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, THEME_MANAGER } from 'src/globals'
 
+type EntitySettings = {
+    char: EntityChar,
+    color: ThemeColor,
+    opaque: boolean,
+    solid: boolean,
+}
+
+export const TYPE_SETTINGS_MAP: Record<EntityType, EntitySettings> = {
+    [ENTITY_TYPES.DEFAULT]: {
+        char: CHARS.QUESTION,
+        color: THEME_COLOR.HIGH,
+        opaque: false,
+        solid: false,
+    },
+    [ENTITY_TYPES.ACTOR]: {
+        char: CHARS.DOLLAR,
+        color: THEME_COLOR.ACCENT,
+        opaque: false,
+        solid: true,
+    },
+    [ENTITY_TYPES.PLAYER]: {
+        char: CHARS.AT,
+        color: THEME_COLOR.POP,
+        opaque: false,
+        solid: true,
+    },
+    [ENTITY_TYPES.WALL]: {
+        char: CHARS.HASH,
+        color: THEME_COLOR.HIGH,
+        opaque: true,
+        solid: true,
+    },
+    [ENTITY_TYPES.DOT]: {
+        char: CHARS.DOT,
+        color: THEME_COLOR.HIGH,
+        opaque: false,
+        solid: false,
+    },
+    [ENTITY_TYPES.DOOR]: {
+        char: CHARS.PLUS,
+        color: THEME_COLOR.ACCENT,
+        opaque: true,
+        solid: true,
+    },
+    [ENTITY_TYPES.PORTAL]: {
+        char: CHARS.DOWN,
+        color: THEME_COLOR.ACCENT,
+        opaque: false,
+        solid: false,
+    },
+} as const
+
 export type EntityProps = {
-    color?: ThemeColor
     position: Vector2
-    size?: number
     type?: EntityType
 }
 
 // - Entity Class -
 class Entity {
-    color: ThemeColor = THEME_COLOR.HIGH
     position: Vector2
-    size: number = GRID_SIZE
     type: EntityType = ENTITY_TYPES.DEFAULT
 
     constructor(props: EntityProps) {
-        this.color = props.color ?? this.color
         this.position = props.position
-        this.size = props.size ?? this.size
         this.type = props.type ?? this.type
     }
 
@@ -28,16 +74,19 @@ class Entity {
         if (this.isOutsideGrid()) return
         const drawPos = this.position.subtract(CAMERA.position).multiply(GRID_SIZE)
 
-        CTX.fillStyle = THEME_MANAGER.getColors()[color || this.color]
-        CTX.font = `${this.size}px Andale Mono`
+        CTX.fillStyle = THEME_MANAGER.getColors()[color || TYPE_SETTINGS_MAP[this.type].color]
+        CTX.font = `${GRID_SIZE}px Andale Mono`
         CTX.textAlign = 'center'
         CTX.textBaseline = 'middle'
-        CTX.fillText(TYPE_CHAR_MAP[this.type], drawPos.x + GRID_PAD, drawPos.y + GRID_PAD)
+        CTX.fillText(TYPE_SETTINGS_MAP[this.type].char, drawPos.x + GRID_PAD, drawPos.y + GRID_PAD)
     }
 
     setPosition = (pos: Vector2) => {
         this.position = pos
     }
+
+    isSolid = (): boolean => TYPE_SETTINGS_MAP[this.type].solid
+    isOpaque = (): boolean => TYPE_SETTINGS_MAP[this.type].opaque
 
     isCollided = (entity: Entity): boolean => (
         this.position.x === entity.position.x && this.position.y === entity.position.y

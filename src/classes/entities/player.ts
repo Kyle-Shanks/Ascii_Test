@@ -1,7 +1,6 @@
 import Actor, { ActorProps } from 'src/classes/entities/actor'
 import { InputEvent } from 'src/classes/input'
 import Map from 'src/classes/map'
-import { THEME_COLOR } from 'src/classes/theme'
 import { ENTITY_TYPES } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
 
@@ -31,25 +30,20 @@ class Player extends Actor {
                 case 'D':
                     dir = Vector2.RIGHT
                     break
-                case 'Shift':
-                    this.color = THEME_COLOR.HIGH
-                    break
             }
 
             if (dir) this._updatePosition(dir, map)
         } else if (event.type === 'release') {
-            switch (event.key) {
-                case 'Shift':
-                    this.color = THEME_COLOR.POP
-                    break
-            }
+            switch (event.key) {}
         }
     }
 
     private _updatePosition = (dir: Vector2, map: Map) => {
         const newPosition = this.position.add(dir)
-        // Check if something is at the new position
-        if (!map.isPositionEmpty(newPosition)) return
+        const entityAtPosition = map.getAtPosition(newPosition)
+
+        if (entityAtPosition !== null && entityAtPosition.isSolid()) return
+
         this.position = newPosition
     }
 }

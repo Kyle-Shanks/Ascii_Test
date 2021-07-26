@@ -9,6 +9,7 @@ export const THEME_COLOR = {
     BACKGROUND: 'background',
     LOW: 'low',
     HIGH: 'high',
+    ACCENT: 'accent',
     POP: 'pop',
 } as const
 
@@ -24,12 +25,14 @@ class ThemeManager {
             background: '#2a303c',
             low: '#464e5f',
             high: '#e2e8f0',
-            pop: '#4ca2a1',
+            accent: '#eec323',
+            pop: '#4cc2c1',
         },
         [THEME.LIGHT]: {
             background: '#ffffff',
             low: '#cbd5e0',
             high: '#2d3748',
+            accent: '#4ca2a1',
             pop: '#ef9433',
         },
     }
