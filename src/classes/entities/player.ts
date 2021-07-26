@@ -46,10 +46,10 @@ class Player extends Actor {
         }
     }
 
-    private _updatePosition = (vec: Vector2, map: Map) => {
-        const newPosition = this.position.add(vec)
-        // Check if outside grid or if a wall is at the new position
-        if (newPosition.isOutsideGrid() || !map.isPositionEmpty(newPosition)) return
+    private _updatePosition = (dir: Vector2, map: Map) => {
+        const newPosition = this.position.add(dir)
+        // Check if something is at the new position
+        if (!map.isPositionEmpty(newPosition)) return
         this.position = newPosition
     }
 }

@@ -1,5 +1,7 @@
 import Entity from 'src/classes/entities/entity'
-import { MapInfo, MapData, MapNumMap, MapNum } from 'src/core/mapData'
+import { THEME_COLOR } from 'src/classes/theme'
+import { ENTITY_TYPES } from 'src/core/constants'
+import { MapInfo, MapData, MapNumMap } from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 
 class Map {
@@ -8,6 +10,8 @@ class Map {
     title: string
     data: MapData
     entities: Entity[]
+    startPosition: Vector2
+    seenMap: Record<string, boolean>
 
     constructor(info: MapInfo) {
         this.title = info.title
@@ -15,10 +19,20 @@ class Map {
         this.height = info.data.length
         this.width = info.data[0].length
         this.entities = this._getEntities()
+        this.startPosition = info.startPosition
+        this.seenMap = {}
     }
 
-    draw = () => {
-        this.entities.forEach((entity) => entity.draw())
+    draw = (lightMap: Record<string, boolean>) => {
+        this.entities.forEach((entity) => {
+            const key = `${entity.position.x},${entity.position.y}`
+            if (lightMap[key]) {
+                entity.draw()
+                this.seenMap[key] = true
+            } else if (this.seenMap[key]) {
+                entity.draw(THEME_COLOR.LOW)
+            }
+        })
     }
 
     isPositionOutsideMap = (pos: Vector2): boolean => (
@@ -37,12 +51,20 @@ class Map {
         const arr: Entity[] = []
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
-                const num: MapNum | null = this.data[i][j]
+                const num = this.data[i][j]
                 if (num !== null) {
                     arr.push(
                         new Entity({
                             position: new Vector2(j, i),
-                            type: MapNumMap[num]
+                            type: MapNumMap[num],
+                        })
+                    )
+                } else {
+                    arr.push(
+                        new Entity({
+                            position: new Vector2(j, i),
+                            type: ENTITY_TYPES.DOT,
+                            // color: THEME_COLOR.LOW
                         })
                     )
                 }

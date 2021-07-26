@@ -29,6 +29,7 @@ export const ENTITY_TYPES = {
     ACTOR: 'Actor',
     PLAYER: 'Player',
     WALL: 'Wall',
+    DOT: 'Dot',
 } as const
 
 export type EntityType = typeof ENTITY_TYPES[keyof typeof ENTITY_TYPES]
@@ -38,4 +39,5 @@ export const TYPE_CHAR_MAP: Record<EntityType, EntityChar> = {
     [ENTITY_TYPES.DEFAULT]: CHARS.QUESTION,
     [ENTITY_TYPES.PLAYER]: CHARS.AT,
     [ENTITY_TYPES.WALL]: CHARS.HASH,
+    [ENTITY_TYPES.DOT]: CHARS.DOT,
 } as const

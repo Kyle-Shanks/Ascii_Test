@@ -7,8 +7,8 @@ import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, INPUT, THEME_MANAGER } from 'src/globals'
 
-const PLAYER = new Player({ position: new Vector2(3, 3) })
-const MAP = new Map(mapData[0])
+const MAP = new Map(mapData[1])
+const PLAYER = new Player({ position: MAP.startPosition})
 
 // draw background
 const drawBackground = () => {
@@ -51,10 +51,56 @@ const drawGrid = (gridSize = GRID_SIZE) => {
     }
 }
 
+// Draw Light at a position
+const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
+    const posArr = pos.getAtDistance(strength)
+    const lightMap: Record<string, boolean> = {}
+
+    posArr.forEach((vec) => {
+        let start = pos
+        const dx = Math.abs(vec.x - start.x)
+        const dy = Math.abs(vec.y - start.y)
+        const sx = start.x < vec.x ? Vector2.RIGHT : Vector2.LEFT
+        const sy = start.y < vec.y ? Vector2.DOWN : Vector2.UP
+
+        let err = dx - dy
+
+        while (true) {
+            if (!lightMap[`${start.x},${start.y}`] && !MAP.isPositionOutsideMap(start)) {
+                const rectPos = start.subtract(CAMERA.position).multiply(GRID_SIZE)
+                CTX.fillStyle = `rgba(255,255,255,0.1)`
+                CTX.fillRect(rectPos.x + GRID_SIZE / 2, rectPos.y + GRID_SIZE / 2, GRID_SIZE, GRID_SIZE)
+                lightMap[`${start.x},${start.y}`] = true
+                if (!MAP.isPositionEmpty(start)) break
+            }
+
+            if (start.isEqual(vec) || !MAP.isPositionEmpty(start)) break
+            const err2 = err * 2
+
+            if (err2 > -dy) {
+                err -= dy
+                start = start.add(sx)
+            }
+            if (err2 < dx) {
+                err += dx
+                start = start.add(sy)
+            }
+        }
+
+        // Draw vision range
+        // const rectPos = vec.subtract(CAMERA.position).multiply(GRID_SIZE)
+        // CTX.fillStyle = `rgba(150,150,150,0.4)`
+        // CTX.fillRect(rectPos.x + GRID_SIZE / 2, rectPos.y + GRID_SIZE / 2, GRID_SIZE, GRID_SIZE)
+    })
+
+    return lightMap
+}
+
 const draw = () => {
     drawBackground()
-    drawDotGrid()
-    MAP.draw()
+    // drawDotGrid()
+    const lightMap = drawLight(PLAYER.position, 10) // Draw player vision
+    MAP.draw(lightMap)
     PLAYER.draw()
 }
 
@@ -65,8 +111,10 @@ class InputWatcher implements InputObserver {
 
     update = (event: InputEvent) => {
         PLAYER.update(event, MAP)
-        if (event.type === 'press') CAMERA.updatePosition(PLAYER.position.subtract(cameraOffset))
-        draw()
+        if (event.type === 'press') {
+            CAMERA.updatePosition(PLAYER.position.subtract(cameraOffset))
+            draw()
+        }
     }
 }
 
