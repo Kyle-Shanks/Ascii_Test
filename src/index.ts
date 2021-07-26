@@ -53,7 +53,9 @@ const drawGrid = (gridSize = GRID_SIZE) => {
 
 // Draw Light at a position
 const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
-    const posArr = pos.getAtDistance(strength)
+    // const posArr = pos.getAtDistance(strength)
+    // Using getWithinDistance method for more natural looking light at slight performance cost
+    const posArr = pos.getWithinDistance(strength)
     const lightMap: Record<string, boolean> = {}
 
     posArr.forEach((vec) => {
@@ -68,10 +70,9 @@ const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
         while (true) {
             if (!lightMap[`${start.x},${start.y}`] && !MAP.isPositionOutsideMap(start)) {
                 const rectPos = start.subtract(CAMERA.position).multiply(GRID_SIZE)
-                CTX.fillStyle = `rgba(255,255,255,0.1)`
+                CTX.fillStyle = `rgba(255,255,255,0.03)`
                 CTX.fillRect(rectPos.x + GRID_SIZE / 2, rectPos.y + GRID_SIZE / 2, GRID_SIZE, GRID_SIZE)
                 lightMap[`${start.x},${start.y}`] = true
-                if (!MAP.isPositionEmpty(start)) break
             }
 
             if (start.isEqual(vec) || !MAP.isPositionEmpty(start)) break
@@ -86,11 +87,6 @@ const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
                 start = start.add(sy)
             }
         }
-
-        // Draw vision range
-        // const rectPos = vec.subtract(CAMERA.position).multiply(GRID_SIZE)
-        // CTX.fillStyle = `rgba(150,150,150,0.4)`
-        // CTX.fillRect(rectPos.x + GRID_SIZE / 2, rectPos.y + GRID_SIZE / 2, GRID_SIZE, GRID_SIZE)
     })
 
     return lightMap
@@ -99,7 +95,7 @@ const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
 const draw = () => {
     drawBackground()
     // drawDotGrid()
-    const lightMap = drawLight(PLAYER.position, 10) // Draw player vision
+    const lightMap = drawLight(PLAYER.position, 7.5) // Draw player vision
     MAP.draw(lightMap)
     PLAYER.draw()
 }

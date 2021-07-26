@@ -64,7 +64,7 @@ export class Vector2 {
             }
         }
 
-        return vecArr.sort((a,b) => a.distanceTo(this) - b.distanceTo(this))
+        return vecArr.sort((a, b) => a.distanceTo(this) - b.distanceTo(this))
     }
 
     bresenham = (pos: Vector2): Vector2[] => {
