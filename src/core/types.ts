@@ -14,6 +14,9 @@ export class Vector2 {
     static LEFT = new Vector2(-1, 0)
     static RIGHT = new Vector2(1, 0)
 
+    isEqual = (vec: Vector2): boolean => (
+        this.x === vec.x && this.y === vec.y
+    )
     add = (vec: Vector2): Vector2 => (
         new Vector2(this.x + vec.x, this.y + vec.y)
     )
@@ -26,8 +29,8 @@ export class Vector2 {
     divide = (num: number): Vector2 => (
         new Vector2(this.x / num, this.y / num)
     )
-    isEqual = (vec: Vector2): boolean => (
-        this.x === vec.x && this.y === vec.y
+    lerp = (vec: Vector2, amt: number): Vector2 => (
+        this.add(vec.subtract(this).multiply(amt))
     )
 
     length = (): number => this.distanceTo(Vector2.ZERO)

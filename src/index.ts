@@ -51,10 +51,8 @@ const drawGrid = (gridSize = GRID_SIZE) => {
     }
 }
 
-// Draw Light at a position
-const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
-    // const posArr = pos.getAtDistance(strength)
-    // Using getWithinDistance method for more natural looking light at slight performance cost
+// Calculate light at a position
+const calculateLight = (pos: Vector2, strength: number): Record<string, boolean> => {
     const posArr = pos.getWithinDistance(strength)
     const lightMap: Record<string, boolean> = {}
 
@@ -69,9 +67,6 @@ const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
 
         while (true) {
             if (!lightMap[`${start.x},${start.y}`] && !MAP.isPositionOutsideMap(start)) {
-                const rectPos = start.subtract(CAMERA.position).multiply(GRID_SIZE)
-                CTX.fillStyle = `rgba(255,255,255,0.03)`
-                CTX.fillRect(rectPos.x + GRID_SIZE / 2, rectPos.y + GRID_SIZE / 2, GRID_SIZE, GRID_SIZE)
                 lightMap[`${start.x},${start.y}`] = true
             }
 
@@ -95,15 +90,30 @@ const drawLight = (pos: Vector2, strength: number): Record<string, boolean> => {
     return lightMap
 }
 
-const draw = () => {
-    drawBackground()
-    // drawDotGrid()
-    const lightMap = drawLight(PLAYER.position, 7.5) // Draw player vision
-    MAP.draw(lightMap)
-    PLAYER.draw()
+// TODO: Create type for LightMap
+const drawLight = (lightMap: Record<string, boolean>) => {
+    const positions = Object.keys(lightMap).map((str) => {
+        const [x,y] = str.split(',')
+        return new Vector2(Number(x), Number(y))
+    })
+
+    positions.forEach((pos) => {
+        const rectPos = pos.multiply(GRID_SIZE).subtract(CAMERA.absPosition)
+        CTX.fillStyle = `rgba(255,255,255,0.03)`
+        CTX.fillRect(rectPos.x + GRID_SIZE / 2, rectPos.y + GRID_SIZE / 2, GRID_SIZE, GRID_SIZE)
+    })
 }
 
 const cameraOffset = new Vector2(19, 14)
+let lightMap = {}
+
+const draw = () => {
+    drawBackground()
+    // drawDotGrid()
+    drawLight(lightMap)
+    MAP.draw(lightMap)
+    PLAYER.draw()
+}
 
 class InputWatcher implements InputObserver {
     readonly id = 'inputWatcher1'
@@ -111,8 +121,8 @@ class InputWatcher implements InputObserver {
     update = (event: InputEvent) => {
         PLAYER.update(event, MAP)
         if (event.type === 'press') {
-            CAMERA.updatePosition(PLAYER.position.subtract(cameraOffset))
-            draw()
+            CAMERA.setPosition(PLAYER.position.subtract(cameraOffset))
+            lightMap = calculateLight(PLAYER.position, 7.5)
         }
     }
 }
@@ -121,6 +131,17 @@ const inputWatcher = new InputWatcher()
 INPUT.subscribe(inputWatcher)
 INPUT.listen()
 
+const init = () => {
+    CAMERA.setPosition(PLAYER.position.subtract(cameraOffset))
+    lightMap = calculateLight(PLAYER.position, 7.5)
+}
+
+const frame = () => {
+    CAMERA.update()
+    draw()
+    requestAnimationFrame(frame)
+}
+
 // Initial Draw
-CAMERA.updatePosition(PLAYER.position.subtract(cameraOffset))
-draw()
+init()
+frame()

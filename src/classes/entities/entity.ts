@@ -72,7 +72,7 @@ class Entity {
 
     draw = (color?: ThemeColor) => {
         if (this.isOutsideGrid()) return
-        const drawPos = this.position.subtract(CAMERA.position).multiply(GRID_SIZE)
+        const drawPos = this.position.multiply(GRID_SIZE).subtract(CAMERA.absPosition)
 
         CTX.fillStyle = THEME_MANAGER.getColors()[color || TYPE_SETTINGS_MAP[this.type].color]
         CTX.font = `${GRID_SIZE}px Andale Mono`
