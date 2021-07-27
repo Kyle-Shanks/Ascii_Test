@@ -60,6 +60,36 @@ class Map {
         return this.objects.find((entity) => entity.position.isEqual(pos)) || null
     }
 
+    removeObject = (obj: Entity) => {
+        // Remove object from object arrays
+        const objIdx = this.objects.indexOf(obj)
+        if (objIdx > -1) this.objects.splice(objIdx, 1)
+        const solidIdx = this.solids.indexOf(obj)
+        if (solidIdx > -1) this.solids.splice(solidIdx, 1)
+        const opaqueIdx = this.opaques.indexOf(obj)
+        if (opaqueIdx > -1) this.opaques.splice(opaqueIdx, 1)
+
+        // Set object to a dot
+        obj.type = ENTITY_TYPES.DOT
+
+        // Update map data
+        this.data[obj.position.y][obj.position.x] = null
+    }
+
+    openDoor = (door: Entity) => {
+        if (door.type !== ENTITY_TYPES.DOOR) {
+            console.error('Not a door')
+            return
+        }
+        this.removeObject(door)
+        // Look for adjacent tiles and remove if they are a door entity
+        const dirs = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+        const objs = dirs.map((dir) => this.getAtPosition(door.position.add(dir)))
+        objs.forEach((obj) => {
+            if (obj !== null && obj.type === ENTITY_TYPES.DOOR) this.removeObject(obj)
+        })
+    }
+
     private _getEntities = () => {
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {

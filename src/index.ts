@@ -28,7 +28,8 @@ const setLevel = (mapId: number) => {
         currentMap = mapId
         MAP = new Map(mapData[currentMap])
         PLAYER.setPosition(MAP.startPosition)
-        CAMERA.resetPosition(PLAYER.position)
+        CAMERA.resetPosition(PLAYER.position.subtract(new Vector2(0, 4))) // Fade in effect
+        CAMERA.setPosition(PLAYER.position)
     }
 
     lightMap = calculateLight(PLAYER.position, 7.5)
@@ -115,7 +116,7 @@ const calculateLight = (pos: Vector2, strength: number): Record<string, boolean>
 // TODO: Create type for LightMap
 const drawLight = (lightMap: Record<string, boolean>) => {
     const positions = Object.keys(lightMap).map((str) => {
-        const [x,y] = str.split(',')
+        const [x, y] = str.split(',')
         return new Vector2(Number(x), Number(y))
     })
 

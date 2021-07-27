@@ -10,13 +10,24 @@ interface PlayerProps extends ActorProps {
 
 type ActionMap = Record<InputKey, (map: Map) => void>
 
+type Inventory = {
+    [ENTITY_TYPES.GOLD]: number
+    [ENTITY_TYPES.KEY]: number
+}
+
 class Player extends Actor {
-    _pressActionMap: ActionMap
-    _releaseActionMap: ActionMap
+    private _pressActionMap: ActionMap
+    private _releaseActionMap: ActionMap
+    inventory: Inventory
 
     constructor(props: PlayerProps) {
         super(props)
         this.type = ENTITY_TYPES.PLAYER
+
+        this.inventory = {
+            [ENTITY_TYPES.GOLD]: 0,
+            [ENTITY_TYPES.KEY]: 0,
+        }
 
         this._pressActionMap = {
             'W': (map: Map) => this._updatePosition(Vector2.UP, map),
@@ -52,18 +63,16 @@ class Player extends Actor {
         if (entityAtPosition === null || !entityAtPosition.isSolid()) {
             this.position = newPosition
 
-            // TODO: Add code to increment inventory counts
+            // Check if player walked over an object
             if (entityAtPosition !== null) {
                 switch (entityAtPosition.type) {
                     case ENTITY_TYPES.KEY:
-                        console.log('Pick up key')
-                        // TODO: Add method on Map to remove an entity
-                        entityAtPosition.type = ENTITY_TYPES.DOT
+                        this.inventory[ENTITY_TYPES.KEY]++
+                        map.removeObject(entityAtPosition)
                         break
                     case ENTITY_TYPES.GOLD:
-                        console.log('Pick up gold')
-                        // TODO: Add method on Map to remove an entity
-                        entityAtPosition.type = ENTITY_TYPES.DOT
+                        this.inventory[ENTITY_TYPES.GOLD]++
+                        map.removeObject(entityAtPosition)
                         break
                 }
             }
@@ -71,13 +80,18 @@ class Player extends Actor {
     }
 
     private _interact = (map: Map) => {
-        const dirs = [Vector2.ZERO, Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+        const dirs = [Vector2.ZERO, Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT] // May not need Vector2.ZERO here?
         const entities = dirs.map((dir) => map.getAtPosition(this.position.add(dir)))
 
         entities.forEach((entity) => {
             if (entity !== null) {
                 switch (entity.type) {
-                    case ENTITY_TYPES.DOOR: return console.log('What a nice door')
+                    case ENTITY_TYPES.DOOR:
+                        if (this.inventory[ENTITY_TYPES.KEY] > 0) {
+                            this.inventory[ENTITY_TYPES.KEY]--
+                            map.openDoor(entity)
+                        }
+                        break
                     case ENTITY_TYPES.WALL: return console.log('What a nice wall')
                 }
             }
