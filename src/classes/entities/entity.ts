@@ -56,8 +56,20 @@ export const TYPE_SETTINGS_MAP: Record<EntityType, EntitySettings> = {
         opaque: true,
         solid: true,
     },
+    [ENTITY_TYPES.KEY]: {
+        char: CHARS.EQUAL,
+        color: THEME_COLOR.ACCENT,
+        opaque: false,
+        solid: false,
+    },
+    [ENTITY_TYPES.GOLD]: {
+        char: CHARS.DOLLAR,
+        color: THEME_COLOR.ACCENT,
+        opaque: false,
+        solid: false,
+    },
     [ENTITY_TYPES.PORTAL]: {
-        char: CHARS.DOWN,
+        char: CHARS.GT,
         color: THEME_COLOR.ACCENT,
         opaque: false,
         solid: false,

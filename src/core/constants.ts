@@ -23,9 +23,12 @@ export const CHARS = {
     EXCLAM:   '!',
     PLUS:     '+',
     DASH:     '-',
+    EQUAL:    '=',
     PIPE:     '|',
     UP:       '^',
     DOWN:     'v',
+    LT:       '<',
+    GT:       '>',
 } as const
 
 export type EntityChar = typeof CHARS[keyof typeof CHARS]
@@ -37,7 +40,9 @@ export const ENTITY_TYPES = {
     WALL: 'Wall',
     DOT: 'Dot',
     DOOR: 'Door',
+    KEY: 'Key',
     PORTAL: 'Portal',
+    GOLD: 'Gold',
 } as const
 
 export type EntityType = typeof ENTITY_TYPES[keyof typeof ENTITY_TYPES]

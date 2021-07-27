@@ -23,24 +23,24 @@ class Player extends Actor {
             'A': (map: Map) => this._updatePosition(Vector2.LEFT, map),
             'S': (map: Map) => this._updatePosition(Vector2.DOWN, map),
             'D': (map: Map) => this._updatePosition(Vector2.RIGHT, map),
-            'Shift': (map: Map) => {},
-            'Space': (map: Map) => {},
-            'J': (map: Map) => {},
-            'K': (map: Map) => {},
+            'Shift': (map: Map) => { },
+            'Space': (map: Map) => { },
+            'J': (map: Map) => this._interact(map),
+            'K': (map: Map) => { },
         }
         this._releaseActionMap = {
-            'W': (map: Map) => {},
-            'A': (map: Map) => {},
-            'S': (map: Map) => {},
-            'D': (map: Map) => {},
-            'Shift': (map: Map) => {},
-            'Space': (map: Map) => {},
-            'J': (map: Map) => {},
-            'K': (map: Map) => {},
+            'W': (map: Map) => { },
+            'A': (map: Map) => { },
+            'S': (map: Map) => { },
+            'D': (map: Map) => { },
+            'Shift': (map: Map) => { },
+            'Space': (map: Map) => { },
+            'J': (map: Map) => { },
+            'K': (map: Map) => { },
         }
     }
 
-    update = (event: InputEvent, map: Map) => {
+    handleInput = (event: InputEvent, map: Map) => {
         if (event.type === 'press') this._pressActionMap[event.key](map)
         else if (event.type === 'release') this._releaseActionMap[event.key](map)
     }
@@ -49,7 +49,39 @@ class Player extends Actor {
         const newPosition = this.position.add(dir)
         const entityAtPosition = map.getAtPosition(newPosition)
 
-        if (entityAtPosition === null || !entityAtPosition.isSolid()) this.position = newPosition
+        if (entityAtPosition === null || !entityAtPosition.isSolid()) {
+            this.position = newPosition
+
+            // TODO: Add code to increment inventory counts
+            if (entityAtPosition !== null) {
+                switch (entityAtPosition.type) {
+                    case ENTITY_TYPES.KEY:
+                        console.log('Pick up key')
+                        // TODO: Add method on Map to remove an entity
+                        entityAtPosition.type = ENTITY_TYPES.DOT
+                        break
+                    case ENTITY_TYPES.GOLD:
+                        console.log('Pick up gold')
+                        // TODO: Add method on Map to remove an entity
+                        entityAtPosition.type = ENTITY_TYPES.DOT
+                        break
+                }
+            }
+        }
+    }
+
+    private _interact = (map: Map) => {
+        const dirs = [Vector2.ZERO, Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+        const entities = dirs.map((dir) => map.getAtPosition(this.position.add(dir)))
+
+        entities.forEach((entity) => {
+            if (entity !== null) {
+                switch (entity.type) {
+                    case ENTITY_TYPES.DOOR: return console.log('What a nice door')
+                    case ENTITY_TYPES.WALL: return console.log('What a nice wall')
+                }
+            }
+        })
     }
 }
 

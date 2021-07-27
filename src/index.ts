@@ -2,19 +2,41 @@ import { InputEvent, InputObserver } from 'src/classes/input'
 import Map from 'src/classes/map'
 import Player from 'src/classes/entities/player'
 import { THEME_COLOR } from 'src/classes/theme'
-import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE } from 'src/core/constants'
+import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE, ENTITY_TYPES } from 'src/core/constants'
 import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, INPUT, THEME_MANAGER } from 'src/globals'
 
-const MAP = new Map(mapData[0])
-const PLAYER = new Player({ position: MAP.startPosition})
+let lightMap = {}
+let currentMap = 0
+let MAP = new Map(mapData[currentMap])
+
+const PLAYER = new Player({ position: MAP.startPosition })
 
 // draw background
 const drawBackground = () => {
     CTX.fillStyle = THEME_MANAGER.getColors().background
     CTX.fillRect(0, 0, CNV.width, CNV.height)
 }
+
+const setLevel = (mapId: number) => {
+    if (mapId === currentMap) {
+        PLAYER.setPosition(MAP.startPosition)
+        CAMERA.setPosition(PLAYER.position)
+    } else {
+        lightMap = {}
+        currentMap = mapId
+        MAP = new Map(mapData[currentMap])
+        PLAYER.setPosition(MAP.startPosition)
+        CAMERA.resetPosition(PLAYER.position)
+    }
+
+    lightMap = calculateLight(PLAYER.position, 7.5)
+}
+
+// const prevLevel = () => setLevel(currentMap - 1) // Don't think I'll need this
+const resetLevel = () => setLevel(currentMap)
+const nextLevel = () => setLevel(currentMap + 1)
 
 // Draw dot grid
 const drawDotGrid = (gridSize = GRID_SIZE) => {
@@ -104,9 +126,6 @@ const drawLight = (lightMap: Record<string, boolean>) => {
     })
 }
 
-const cameraOffset = new Vector2(19, 14)
-let lightMap = {}
-
 const draw = () => {
     drawBackground()
     drawLight(lightMap)
@@ -118,9 +137,16 @@ class InputWatcher implements InputObserver {
     readonly id = 'inputWatcher1'
 
     update = (event: InputEvent) => {
-        PLAYER.update(event, MAP)
+        PLAYER.handleInput(event, MAP)
         if (event.type === 'press') {
-            CAMERA.setPosition(PLAYER.position.subtract(cameraOffset))
+            // TODO: Add something to keep track of if the player moved
+
+            // Check if the player is standing on a portal
+            const entityAtPosition = MAP.getAtPosition(PLAYER.position)
+            if (entityAtPosition !== null && entityAtPosition.type == ENTITY_TYPES.PORTAL) return nextLevel()
+
+            // Update camera and recalculate light
+            CAMERA.setPosition(PLAYER.position)
             lightMap = calculateLight(PLAYER.position, 7.5)
         }
     }
@@ -131,8 +157,7 @@ INPUT.subscribe(inputWatcher)
 INPUT.listen()
 
 const init = () => {
-    CAMERA.setPosition(PLAYER.position.subtract(cameraOffset))
-    lightMap = calculateLight(PLAYER.position, 7.5)
+    setLevel(0)
     frame()
 }
 
@@ -142,5 +167,5 @@ const frame = () => {
     requestAnimationFrame(frame)
 }
 
-// Go Time
+// - Go Time -
 init()
