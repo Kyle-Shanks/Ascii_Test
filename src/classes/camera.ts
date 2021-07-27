@@ -5,11 +5,6 @@ type CameraProps = {
     position?: Vector2
 }
 
-// TODO: Move this
-const lerp = (start: number, end: number, amt: number = 0.1) => (
-    (1 - amt) * start + amt * end
-)
-
 class Camera {
     position: Vector2 = Vector2.ZERO
     absPosition: Vector2 = Vector2.ZERO

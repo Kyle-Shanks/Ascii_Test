@@ -109,7 +109,6 @@ let lightMap = {}
 
 const draw = () => {
     drawBackground()
-    // drawDotGrid()
     drawLight(lightMap)
     MAP.draw(lightMap)
     PLAYER.draw()
@@ -134,6 +133,7 @@ INPUT.listen()
 const init = () => {
     CAMERA.setPosition(PLAYER.position.subtract(cameraOffset))
     lightMap = calculateLight(PLAYER.position, 7.5)
+    frame()
 }
 
 const frame = () => {
@@ -142,6 +142,5 @@ const frame = () => {
     requestAnimationFrame(frame)
 }
 
-// Initial Draw
+// Go Time
 init()
-frame()

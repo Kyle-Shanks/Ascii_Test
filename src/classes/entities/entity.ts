@@ -1,5 +1,14 @@
 import { THEME_COLOR, ThemeColor } from 'src/classes/theme'
-import { CNV, CTX, CHARS, EntityChar, ENTITY_TYPES, EntityType, GRID_PAD, GRID_SIZE } from 'src/core/constants'
+import {
+    CNV,
+    CTX,
+    CHARS,
+    EntityChar,
+    ENTITY_TYPES,
+    EntityType,
+    GRID_PAD,
+    GRID_SIZE,
+} from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, THEME_MANAGER } from 'src/globals'
 

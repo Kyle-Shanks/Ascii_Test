@@ -1,5 +1,4 @@
 import Entity, { EntityProps } from 'src/classes/entities/entity'
-import { THEME_COLOR } from 'src/classes/theme'
 import { ENTITY_TYPES } from 'src/core/constants'
 
 export interface ActorProps extends EntityProps {
