@@ -1,5 +1,6 @@
 import Actor, { ActorProps } from 'src/classes/entities/actor'
 import { InputEvent, InputKey } from 'src/classes/input'
+import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
@@ -18,11 +19,13 @@ type Inventory = {
 class Player extends Actor {
     private _pressActionMap: ActionMap
     private _releaseActionMap: ActionMap
+    private logManager: LogManager
     inventory: Inventory
 
-    constructor(props: PlayerProps) {
+    constructor(props: PlayerProps, logManager: LogManager) {
         super(props)
         this.type = ENTITY_TYPES.PLAYER
+        this.logManager = logManager
 
         this.inventory = {
             [ENTITY_TYPES.GOLD]: 0,
@@ -69,6 +72,7 @@ class Player extends Actor {
                     case ENTITY_TYPES.KEY:
                         this.inventory[ENTITY_TYPES.KEY]++
                         map.removeObject(entityAtPosition)
+                        this.logManager.addLog({ msg: 'You picked up a key!' })
                         break
                     case ENTITY_TYPES.GOLD:
                         this.inventory[ENTITY_TYPES.GOLD]++
@@ -90,9 +94,14 @@ class Player extends Actor {
                         if (this.inventory[ENTITY_TYPES.KEY] > 0) {
                             this.inventory[ENTITY_TYPES.KEY]--
                             map.openDoor(entity)
+                            this.logManager.addLog({ msg: 'You unlocked the door with a key!' })
+                        } else {
+                            this.logManager.addLog({ msg: 'The door is locked.' })
                         }
                         break
-                    case ENTITY_TYPES.WALL: return console.log('What a nice wall')
+                    case ENTITY_TYPES.WALL:
+                        this.logManager.addLog({ msg: 'What a nice wall.' })
+                        break
                 }
             }
         })

@@ -5,13 +5,13 @@ import { THEME_COLOR } from 'src/classes/theme'
 import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE, ENTITY_TYPES } from 'src/core/constants'
 import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
-import { CAMERA, INPUT, THEME_MANAGER } from 'src/globals'
+import { CAMERA, INPUT, LOG_MANAGER, THEME_MANAGER } from 'src/globals'
 
 let lightMap = {}
 let currentMap = 0
 let MAP = new Map(mapData[currentMap])
 
-const PLAYER = new Player({ position: MAP.startPosition })
+const PLAYER = new Player({ position: MAP.startPosition }, LOG_MANAGER)
 
 // draw background
 const drawBackground = () => {
@@ -30,6 +30,7 @@ const setLevel = (mapId: number) => {
         PLAYER.setPosition(MAP.startPosition)
         CAMERA.resetPosition(PLAYER.position.subtract(new Vector2(0, 4))) // Fade in effect
         CAMERA.setPosition(PLAYER.position)
+        LOG_MANAGER.addLog({ msg: `Now Entering: ${MAP.title}` })
     }
 
     lightMap = calculateLight(PLAYER.position, 7.5)
@@ -127,11 +128,39 @@ const drawLight = (lightMap: Record<string, boolean>) => {
     })
 }
 
+const drawUI = () => {
+    CTX.fillStyle = THEME_MANAGER.getColors().low
+    CTX.fillRect(0, CNV.height - 80, CNV.width, 80)
+
+    // Draw the map and user info
+    CTX.fillStyle = THEME_MANAGER.getColors().high
+    CTX.font = `24px Andale Mono`
+    CTX.textAlign = 'left'
+    CTX.textBaseline = 'middle'
+
+    CTX.fillText(`Map: ${MAP.title}`, CNV.width / 2 + 180, CNV.height - 25)
+    CTX.fillStyle = THEME_MANAGER.getColors().danger
+    CTX.fillText(`HP: 4/4`, CNV.width / 2 + 180, CNV.height - 55)
+
+    CTX.fillStyle = THEME_MANAGER.getColors().accent
+    CTX.fillText(`Keys: ${PLAYER.inventory.Key}`, CNV.width / 2 + 30, CNV.height - 55)
+    CTX.fillText(`Gold: ${PLAYER.inventory.Gold}`, CNV.width / 2 + 30, CNV.height - 25)
+
+    // Draw the Logs
+    const lastTwo = LOG_MANAGER.getLogs(2)
+
+    for (let i = 0; i < lastTwo.length; i++) {
+        CTX.fillStyle = THEME_MANAGER.getColors()[lastTwo[i].color || 'high']
+        CTX.fillText(lastTwo[i].msg, 30, CNV.height - (i ? 25 : 55))
+    }
+}
+
 const draw = () => {
     drawBackground()
     drawLight(lightMap)
     MAP.draw(lightMap)
     PLAYER.draw()
+    drawUI()
 }
 
 class InputWatcher implements InputObserver {
@@ -159,6 +188,7 @@ INPUT.listen()
 
 const init = () => {
     setLevel(0)
+    LOG_MANAGER.addLog({ msg: `Welcome to the Dungeon` })
     frame()
 }
 

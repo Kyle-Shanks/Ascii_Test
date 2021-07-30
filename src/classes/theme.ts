@@ -10,6 +10,7 @@ export const THEME_COLOR = {
     LOW: 'low',
     HIGH: 'high',
     ACCENT: 'accent',
+    DANGER: 'danger',
     POP: 'pop',
 } as const
 
@@ -27,6 +28,7 @@ class ThemeManager {
             high: '#e2e8f0',
             accent: '#eec323',
             pop: '#4cc2c1',
+            danger: '#ff6347',
         },
         [THEME.LIGHT]: {
             background: '#ffffff',
@@ -34,6 +36,7 @@ class ThemeManager {
             high: '#2d3748',
             accent: '#4ca2a1',
             pop: '#ef9433',
+            danger: '#ff6347',
         },
     }
 
