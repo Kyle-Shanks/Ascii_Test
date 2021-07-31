@@ -37,6 +37,7 @@ export const ENTITY_TYPES = {
     DEFAULT: 'Entity',
     ACTOR: 'Actor',
     PLAYER: 'Player',
+    ENEMY: 'Enemy',
     WALL: 'Wall',
     DOT: 'Dot',
     DOOR: 'Door',

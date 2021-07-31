@@ -1,5 +1,6 @@
 import { InputEvent, InputObserver } from 'src/classes/input'
 import Map from 'src/classes/map'
+import Enemy from 'src/classes/entities/enemy'
 import Player from 'src/classes/entities/player'
 import { THEME_COLOR } from 'src/classes/theme'
 import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE, ENTITY_TYPES } from 'src/core/constants'
@@ -7,18 +8,26 @@ import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, INPUT, LOG_MANAGER, THEME_MANAGER } from 'src/globals'
 
-let lightMap = {}
-let currentMap = 0
-let MAP = new Map(mapData[currentMap])
+let lightMap: Record<string, boolean> = {}
+let currentMap: number = 0
+let MAP: Map = new Map(mapData[currentMap])
+let enemies: Enemy[] = mapData[currentMap].enemies.map((info) => new Enemy(info))
 
-const PLAYER = new Player({ position: MAP.startPosition }, LOG_MANAGER)
+const PLAYER = new Player(
+    {
+        position: MAP.startPosition,
+        stats: {
+            HP: 3,
+            ACC: 70,
+            STR: 1,
+            DEF: 0,
+            SPD: 1,
+        }
+    },
+    LOG_MANAGER,
+)
 
-// draw background
-const drawBackground = () => {
-    CTX.fillStyle = THEME_MANAGER.getColors().background
-    CTX.fillRect(0, 0, CNV.width, CNV.height)
-}
-
+// Level functions
 const setLevel = (mapId: number) => {
     if (mapId === currentMap) {
         PLAYER.setPosition(MAP.startPosition)
@@ -40,7 +49,12 @@ const setLevel = (mapId: number) => {
 const resetLevel = () => setLevel(currentMap)
 const nextLevel = () => setLevel(currentMap + 1)
 
-// Draw dot grid
+// Draw functions
+const drawBackground = () => {
+    CTX.fillStyle = THEME_MANAGER.getColors().background
+    CTX.fillRect(0, 0, CNV.width, CNV.height)
+}
+
 const drawDotGrid = (gridSize = GRID_SIZE) => {
     for (let i = GRID_PAD; i <= CNV.width - GRID_PAD; i += gridSize) {
         for (let j = GRID_PAD; j <= CNV.height - GRID_PAD; j += gridSize) {
@@ -53,7 +67,6 @@ const drawDotGrid = (gridSize = GRID_SIZE) => {
     }
 }
 
-// Draw grid lines
 const drawGrid = (gridSize = GRID_SIZE) => {
     CTX.lineWidth = 2
     CTX.strokeStyle = THEME_MANAGER.getColors().low
@@ -73,6 +86,13 @@ const drawGrid = (gridSize = GRID_SIZE) => {
         CTX.lineTo(CNV.width, i)
         CTX.stroke()
     }
+}
+
+const drawEnemies = () => {
+    enemies.forEach((enemy) => {
+        const key = `${enemy.position.x},${enemy.position.y}`
+        if (lightMap[key]) enemy.draw()
+    })
 }
 
 // Calculate light at a position
@@ -95,7 +115,7 @@ const calculateLight = (pos: Vector2, strength: number): Record<string, boolean>
             }
 
             const entityAtPosition = MAP.getAtPosition(start)
-            if (entityAtPosition !== null && entityAtPosition.isOpaque()) break
+            if (entityAtPosition?.isOpaque()) break
             if (start.isEqual(vec)) break
 
             const err2 = err * 2
@@ -140,7 +160,7 @@ const drawUI = () => {
 
     CTX.fillText(`Map: ${MAP.title}`, CNV.width / 2 + 180, CNV.height - 25)
     CTX.fillStyle = THEME_MANAGER.getColors().danger
-    CTX.fillText(`HP: 4/4`, CNV.width / 2 + 180, CNV.height - 55)
+    CTX.fillText(`HP: ${PLAYER.health}/${PLAYER.stats.HP}`, CNV.width / 2 + 180, CNV.height - 55)
 
     CTX.fillStyle = THEME_MANAGER.getColors().accent
     CTX.fillText(`Keys: ${PLAYER.inventory.Key}`, CNV.width / 2 + 30, CNV.height - 55)
@@ -159,6 +179,7 @@ const draw = () => {
     drawBackground()
     drawLight(lightMap)
     MAP.draw(lightMap)
+    drawEnemies()
     PLAYER.draw()
     drawUI()
 }
@@ -167,13 +188,23 @@ class InputWatcher implements InputObserver {
     readonly id = 'inputWatcher1'
 
     update = (event: InputEvent) => {
-        PLAYER.handleInput(event, MAP)
+        PLAYER.handleInput(event, MAP, enemies)
+        // TODO: Check if player if alive here
+
         if (event.type === 'press') {
             // TODO: Add something to keep track of if the player moved
 
+            enemies.forEach((enemy, idx) => {
+                if (enemy.health === 0) {
+                    LOG_MANAGER.addLog({ msg: 'Enemy died.' })
+                    delete enemies[idx]
+                }
+            })
+            enemies = enemies.filter(_ => _)
+
             // Check if the player is standing on a portal
             const entityAtPosition = MAP.getAtPosition(PLAYER.position)
-            if (entityAtPosition !== null && entityAtPosition.type == ENTITY_TYPES.PORTAL) return nextLevel()
+            if (entityAtPosition?.type === ENTITY_TYPES.PORTAL) return nextLevel()
 
             // Update camera and recalculate light
             CAMERA.setPosition(PLAYER.position)

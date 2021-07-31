@@ -38,6 +38,12 @@ export const TYPE_SETTINGS_MAP: Record<EntityType, EntitySettings> = {
         opaque: false,
         solid: true,
     },
+    [ENTITY_TYPES.ENEMY]: {
+        char: CHARS.EXCLAM,
+        color: THEME_COLOR.DANGER,
+        opaque: false,
+        solid: true,
+    },
     [ENTITY_TYPES.WALL]: {
         char: CHARS.HASH,
         color: THEME_COLOR.HIGH,

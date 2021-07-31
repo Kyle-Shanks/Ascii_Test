@@ -99,3 +99,12 @@ export class Vector2 {
         return arr
     }
 }
+
+// Actor Stats type
+export type Stats = {
+    HP: number
+    ACC: number
+    STR: number
+    DEF: number
+    SPD: number
+}

@@ -1,4 +1,6 @@
 import Actor, { ActorProps } from 'src/classes/entities/actor'
+import Enemy from 'src/classes/entities/enemy'
+import Entity from 'src/classes/entities/entity'
 import { InputEvent, InputKey } from 'src/classes/input'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
@@ -9,7 +11,7 @@ interface PlayerProps extends ActorProps {
     // Any player specific props go here
 }
 
-type ActionMap = Record<InputKey, (map: Map) => void>
+type ActionMap = Record<InputKey, (map: Map, enemies: Enemy[]) => void>
 
 type Inventory = {
     [ENTITY_TYPES.GOLD]: number
@@ -33,57 +35,72 @@ class Player extends Actor {
         }
 
         this._pressActionMap = {
-            'W': (map: Map) => this._updatePosition(Vector2.UP, map),
-            'A': (map: Map) => this._updatePosition(Vector2.LEFT, map),
-            'S': (map: Map) => this._updatePosition(Vector2.DOWN, map),
-            'D': (map: Map) => this._updatePosition(Vector2.RIGHT, map),
-            'Shift': (map: Map) => { },
-            'Space': (map: Map) => { },
-            'J': (map: Map) => this._interact(map),
-            'K': (map: Map) => { },
+            'W': (map: Map, enemies: Enemy[]) => this._walk(Vector2.UP, map, enemies),
+            'A': (map: Map, enemies: Enemy[]) => this._walk(Vector2.LEFT, map, enemies),
+            'S': (map: Map, enemies: Enemy[]) => this._walk(Vector2.DOWN, map, enemies),
+            'D': (map: Map, enemies: Enemy[]) => this._walk(Vector2.RIGHT, map, enemies),
+            'Shift': () => {},
+            'Space': () => {},
+            'J': (map: Map, enemies: Enemy[]) => this._interact(map, enemies),
+            'K': () => {},
         }
         this._releaseActionMap = {
-            'W': (map: Map) => { },
-            'A': (map: Map) => { },
-            'S': (map: Map) => { },
-            'D': (map: Map) => { },
-            'Shift': (map: Map) => { },
-            'Space': (map: Map) => { },
-            'J': (map: Map) => { },
-            'K': (map: Map) => { },
+            'W': () => {},
+            'A': () => {},
+            'S': () => {},
+            'D': () => {},
+            'Shift': () => {},
+            'Space': () => {},
+            'J': () => {},
+            'K': () => {},
         }
     }
 
-    handleInput = (event: InputEvent, map: Map) => {
-        if (event.type === 'press') this._pressActionMap[event.key](map)
-        else if (event.type === 'release') this._releaseActionMap[event.key](map)
+    handleInput = (event: InputEvent, map: Map, enemies: Enemy[]) => {
+        if (event.type === 'press') this._pressActionMap[event.key](map, enemies)
+        else if (event.type === 'release') this._releaseActionMap[event.key](map, enemies)
     }
 
-    private _updatePosition = (dir: Vector2, map: Map) => {
+    private _walk = (dir: Vector2, map: Map, enemies: Enemy[]) => {
         const newPosition = this.position.add(dir)
+
+        // Check for enemy at the new position
+        const enemyAtPosition = enemies.find((enemy) => enemy.position.isEqual(newPosition))
+        if (enemyAtPosition?.isSolid()) return this._walkInto(enemyAtPosition)
+
+        // Check for a solid entity at the new position
         const entityAtPosition = map.getAtPosition(newPosition)
+        if (entityAtPosition?.isSolid()) return this._walkInto(entityAtPosition)
 
-        if (entityAtPosition === null || !entityAtPosition.isSolid()) {
-            this.position = newPosition
+        // Update position if nothing solid is in the way
+        this.position = newPosition
 
-            // Check if player walked over an object
-            if (entityAtPosition !== null) {
-                switch (entityAtPosition.type) {
-                    case ENTITY_TYPES.KEY:
-                        this.inventory[ENTITY_TYPES.KEY]++
-                        map.removeObject(entityAtPosition)
-                        this.logManager.addLog({ msg: 'You picked up a key!' })
-                        break
-                    case ENTITY_TYPES.GOLD:
-                        this.inventory[ENTITY_TYPES.GOLD]++
-                        map.removeObject(entityAtPosition)
-                        break
-                }
+        // If player walked over something, check it out
+        if (entityAtPosition) {
+            switch (entityAtPosition.type) {
+                case ENTITY_TYPES.KEY:
+                    this.inventory[ENTITY_TYPES.KEY]++
+                    map.removeObject(entityAtPosition)
+                    this.logManager.addLog({ msg: 'You picked up a key!' })
+                    break
+                case ENTITY_TYPES.GOLD:
+                    this.inventory[ENTITY_TYPES.GOLD]++
+                    map.removeObject(entityAtPosition)
+                    break
             }
         }
     }
 
-    private _interact = (map: Map) => {
+    private _walkInto = (entity: Entity) => {
+        if (entity instanceof Enemy) {
+            this._hit(entity)
+        } else {
+            // Do things based on type here
+            switch (entity.type) {}
+        }
+    }
+
+    private _interact = (map: Map, enemies: Enemy[]) => {
         const dirs = [Vector2.ZERO, Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT] // May not need Vector2.ZERO here?
         const entities = dirs.map((dir) => map.getAtPosition(this.position.add(dir)))
 

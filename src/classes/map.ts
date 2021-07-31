@@ -86,7 +86,7 @@ class Map {
         const dirs = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
         const objs = dirs.map((dir) => this.getAtPosition(door.position.add(dir)))
         objs.forEach((obj) => {
-            if (obj !== null && obj.type === ENTITY_TYPES.DOOR) this.removeObject(obj)
+            if (obj?.type === ENTITY_TYPES.DOOR) this.removeObject(obj)
         })
     }
 

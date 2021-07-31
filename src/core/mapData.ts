@@ -1,5 +1,5 @@
 import { ENTITY_TYPES, EntityType } from 'src/core/constants'
-import { Vector2 } from 'src/core/types'
+import { Stats, Vector2 } from 'src/core/types'
 
 const MAP_NUM = {
     WALL: 0,
@@ -22,8 +22,14 @@ export const MapNumMap: Record<MapNum, EntityType> = {
 
 export type MapData = (MapNum | null)[][]
 
+type EnemyProps = {
+    position: Vector2
+    stats: Stats
+}
+
 export type MapInfo = {
     data: MapData
+    enemies: EnemyProps[]
     startPosition: Vector2
     title: string
 }
@@ -35,6 +41,18 @@ const mapData: MapInfo[] = [
     {
         title: 'Test Level',
         startPosition: new Vector2(3, 3),
+        enemies: [
+            {
+                position: new Vector2(8,6),
+                stats: {
+                    HP: 1,
+                    ACC: 50,
+                    STR: 1,
+                    DEF: 0,
+                    SPD: 1,
+                },
+            }
+        ],
         data: [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
@@ -53,6 +71,7 @@ const mapData: MapInfo[] = [
     {
         title: 'Test Level 2',
         startPosition: new Vector2(3, 3),
+        enemies: [],
         data: [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
@@ -67,6 +86,7 @@ const mapData: MapInfo[] = [
     {
         title: 'Bigger Test Level',
         startPosition: new Vector2(2, 10),
+        enemies: [],
         data: [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,_,_,_,_,_,_,0,_,_,_,_,_,_,0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0,_,_,_,_,_,_,0],
