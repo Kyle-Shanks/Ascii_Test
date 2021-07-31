@@ -1,5 +1,6 @@
 import { ENTITY_TYPES, EntityType } from 'src/core/constants'
-import { Stats, Vector2 } from 'src/core/types'
+import { EnemyType, ENEMY_TYPE } from 'src/core/enemyData'
+import { Vector2 } from 'src/core/types'
 
 const MAP_NUM = {
     WALL: 0,
@@ -24,7 +25,7 @@ export type MapData = (MapNum | null)[][]
 
 type EnemyProps = {
     position: Vector2
-    stats: Stats
+    enemyType: EnemyType
 }
 
 export type MapInfo = {
@@ -44,14 +45,16 @@ const mapData: MapInfo[] = [
         enemies: [
             {
                 position: new Vector2(8,6),
-                stats: {
-                    HP: 1,
-                    ACC: 50,
-                    STR: 1,
-                    DEF: 0,
-                    SPD: 1,
-                },
-            }
+                enemyType: ENEMY_TYPE.KOBOLD
+            },
+            {
+                position: new Vector2(11,6),
+                enemyType: ENEMY_TYPE.RAT
+            },
+            {
+                position: new Vector2(11,7),
+                enemyType: ENEMY_TYPE.RAT
+            },
         ],
         data: [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],

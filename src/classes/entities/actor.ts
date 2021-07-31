@@ -1,4 +1,5 @@
 import Entity, { EntityProps } from 'src/classes/entities/entity'
+import LogManager from 'src/classes/logManager'
 import { ENTITY_TYPES } from 'src/core/constants'
 import { Stats } from 'src/core/types'
 
@@ -10,12 +11,14 @@ class Actor extends Entity {
     health: number
     stats: Stats
     update!: Function
+    protected logManager: LogManager
 
-    constructor(props: ActorProps) {
+    constructor(props: ActorProps, logManager: LogManager) {
         super(props)
         this.health = props.stats.HP
         this.stats = props.stats
         this.type = ENTITY_TYPES.ACTOR
+        this.logManager = logManager
     }
 
     takeDamage = (dmg: number) => {
@@ -27,7 +30,7 @@ class Actor extends Entity {
         this.health = Math.min(this.health + amount, this.stats.HP)
     }
 
-    protected _hit = (actor: Actor) => {
+    protected _attack = (actor: Actor) => {
         const rand = Math.random() * 100
 
         // TODO: Log miss

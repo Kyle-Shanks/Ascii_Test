@@ -85,16 +85,19 @@ export const TYPE_SETTINGS_MAP: Record<EntityType, EntitySettings> = {
 export type EntityProps = {
     position: Vector2
     type?: EntityType
+    char?: EntityChar
 }
 
 // - Entity Class -
 class Entity {
     position: Vector2
     type: EntityType = ENTITY_TYPES.DEFAULT
+    private _char: EntityChar | null // Allow for character override
 
     constructor(props: EntityProps) {
         this.position = props.position
         this.type = props.type ?? this.type
+        this._char = props.char || null
     }
 
     draw = (color?: ThemeColor) => {
@@ -105,7 +108,11 @@ class Entity {
         CTX.font = `${GRID_SIZE}px Andale Mono`
         CTX.textAlign = 'center'
         CTX.textBaseline = 'middle'
-        CTX.fillText(TYPE_SETTINGS_MAP[this.type].char, drawPos.x + GRID_PAD, drawPos.y + GRID_PAD)
+        CTX.fillText(
+            this._char || TYPE_SETTINGS_MAP[this.type].char,
+            drawPos.x + GRID_PAD,
+            drawPos.y + GRID_PAD
+        )
     }
 
     setPosition = (pos: Vector2) => {

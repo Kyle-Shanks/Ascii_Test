@@ -21,13 +21,11 @@ type Inventory = {
 class Player extends Actor {
     private _pressActionMap: ActionMap
     private _releaseActionMap: ActionMap
-    private logManager: LogManager
     inventory: Inventory
 
     constructor(props: PlayerProps, logManager: LogManager) {
-        super(props)
+        super(props, logManager)
         this.type = ENTITY_TYPES.PLAYER
-        this.logManager = logManager
 
         this.inventory = {
             [ENTITY_TYPES.GOLD]: 0,
@@ -93,7 +91,7 @@ class Player extends Actor {
 
     private _walkInto = (entity: Entity) => {
         if (entity instanceof Enemy) {
-            this._hit(entity)
+            this._attack(entity)
         } else {
             // Do things based on type here
             switch (entity.type) {}

@@ -4,6 +4,7 @@ import Enemy from 'src/classes/entities/enemy'
 import Player from 'src/classes/entities/player'
 import { THEME_COLOR } from 'src/classes/theme'
 import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE, ENTITY_TYPES } from 'src/core/constants'
+import { enemyStatsMap } from 'src/core/enemyData'
 import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, INPUT, LOG_MANAGER, THEME_MANAGER } from 'src/globals'
@@ -11,14 +12,19 @@ import { CAMERA, INPUT, LOG_MANAGER, THEME_MANAGER } from 'src/globals'
 let lightMap: Record<string, boolean> = {}
 let currentMap: number = 0
 let MAP: Map = new Map(mapData[currentMap])
-let enemies: Enemy[] = mapData[currentMap].enemies.map((info) => new Enemy(info))
+let enemies: Enemy[] = mapData[currentMap].enemies.map((info) => (
+    new Enemy(
+        {...info, ...enemyStatsMap[info.enemyType]},
+        LOG_MANAGER,
+    )
+))
 
 const PLAYER = new Player(
     {
         position: MAP.startPosition,
         stats: {
-            HP: 3,
-            ACC: 70,
+            HP: 4,
+            ACC: 85,
             STR: 1,
             DEF: 0,
             SPD: 1,
@@ -194,13 +200,14 @@ class InputWatcher implements InputObserver {
         if (event.type === 'press') {
             // TODO: Add something to keep track of if the player moved
 
+            const deadEnemyArr: number[] = []
             enemies.forEach((enemy, idx) => {
                 if (enemy.health === 0) {
-                    LOG_MANAGER.addLog({ msg: 'Enemy died.' })
-                    delete enemies[idx]
+                    LOG_MANAGER.addLog({ msg: `${enemy.enemyType} died.` })
+                    deadEnemyArr.push(idx)
                 }
             })
-            enemies = enemies.filter(_ => _)
+            enemies = enemies.filter((_, idx) => !deadEnemyArr.includes(idx))
 
             // Check if the player is standing on a portal
             const entityAtPosition = MAP.getAtPosition(PLAYER.position)
