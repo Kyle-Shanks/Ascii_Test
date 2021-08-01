@@ -56,6 +56,12 @@ export const TYPE_SETTINGS_MAP: Record<EntityType, EntitySettings> = {
         opaque: false,
         solid: false,
     },
+    [ENTITY_TYPES.GATE]: {
+        char: CHARS.DASH,
+        color: THEME_COLOR.ACCENT,
+        opaque: true,
+        solid: true,
+    },
     [ENTITY_TYPES.DOOR]: {
         char: CHARS.PLUS,
         color: THEME_COLOR.ACCENT,

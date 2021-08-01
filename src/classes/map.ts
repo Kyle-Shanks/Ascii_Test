@@ -76,9 +76,10 @@ class Map {
         this.data[obj.position.y][obj.position.x] = null
     }
 
+    // TODO: Update this to look for more than one extra tile
     openDoor = (door: Entity) => {
-        if (door.type !== ENTITY_TYPES.DOOR) {
-            console.error('Not a door')
+        if (door.type !== ENTITY_TYPES.DOOR && door.type !== ENTITY_TYPES.GATE) {
+            console.error('Not a door or gate')
             return
         }
         this.removeObject(door)
@@ -86,7 +87,7 @@ class Map {
         const dirs = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
         const objs = dirs.map((dir) => this.getAtPosition(door.position.add(dir)))
         objs.forEach((obj) => {
-            if (obj?.type === ENTITY_TYPES.DOOR) this.removeObject(obj)
+            if (obj?.type === ENTITY_TYPES.DOOR || obj?.type === ENTITY_TYPES.GATE) this.removeObject(obj)
         })
     }
 

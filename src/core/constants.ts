@@ -68,6 +68,7 @@ export const ENTITY_TYPES = {
     ENEMY: 'Enemy',
     WALL: 'Wall',
     DOT: 'Dot',
+    GATE: 'Gate',
     DOOR: 'Door',
     KEY: 'Key',
     PORTAL: 'Portal',

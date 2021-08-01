@@ -105,6 +105,12 @@ class Player extends Actor {
         entities.forEach((entity) => {
             if (entity !== null) {
                 switch (entity.type) {
+                    case ENTITY_TYPES.WALL:
+                        this.logManager.addLog({ msg: 'What a nice wall.' })
+                        break
+                    case ENTITY_TYPES.GATE:
+                        map.openDoor(entity)
+                        break
                     case ENTITY_TYPES.DOOR:
                         if (this.inventory[ENTITY_TYPES.KEY] > 0) {
                             this.inventory[ENTITY_TYPES.KEY]--
@@ -113,9 +119,6 @@ class Player extends Actor {
                         } else {
                             this.logManager.addLog({ msg: 'The door is locked.' })
                         }
-                        break
-                    case ENTITY_TYPES.WALL:
-                        this.logManager.addLog({ msg: 'What a nice wall.' })
                         break
                 }
             }
