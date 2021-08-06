@@ -14,6 +14,8 @@ export class Vector2 {
     static LEFT = new Vector2(-1, 0)
     static RIGHT = new Vector2(1, 0)
 
+    toString = (): string => `${this.x},${this.y}`
+
     isEqual = (vec: Vector2): boolean => (
         this.x === vec.x && this.y === vec.y
     )

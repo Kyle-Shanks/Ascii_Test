@@ -1,7 +1,7 @@
 import Entity from 'src/classes/entities/entity'
 import { THEME_COLOR } from 'src/classes/theme'
 import { ENTITY_TYPES } from 'src/core/constants'
-import { MapInfo, MapData, MapNumMap } from 'src/core/mapData'
+import { MAP_NUM, MapInfo, MapData, MapNumMap } from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 
 class Map {
@@ -46,6 +46,12 @@ class Map {
     isPositionOutsideMap = (pos: Vector2): boolean => (
         pos.x < 0 || pos.y < 0 || pos.x >= this.width || pos.y >= this.height
     )
+
+    isPositionWalkable = (pos: Vector2): boolean => {
+        if (this.isPositionOutsideMap(pos)) return false
+        const num = this.data[pos.y][pos.x]
+        return num === null || num === MAP_NUM.KEY || num === MAP_NUM.GOLD
+    }
 
     isPositionEmpty = (pos: Vector2): boolean => {
         if (this.isPositionOutsideMap(pos)) {

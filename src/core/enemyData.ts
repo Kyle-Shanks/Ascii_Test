@@ -21,7 +21,7 @@ export const enemyStatsMap: Record<EnemyType, EnemyInfo> = {
             STR: 1,
             DEF: 0,
             SPD: 1,
-            ACC: 50,
+            ACC: 70,
         },
     },
     [ENEMY_TYPE.KOBOLD]: {
@@ -31,7 +31,7 @@ export const enemyStatsMap: Record<EnemyType, EnemyInfo> = {
             STR: 1,
             DEF: 0,
             SPD: 1,
-            ACC: 60,
+            ACC: 80,
         },
     },
 }

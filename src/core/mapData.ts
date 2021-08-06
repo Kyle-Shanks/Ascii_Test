@@ -2,7 +2,7 @@ import { ENTITY_TYPES, EntityType } from 'src/core/constants'
 import { EnemyType, ENEMY_TYPE } from 'src/core/enemyData'
 import { Vector2 } from 'src/core/types'
 
-const MAP_NUM = {
+export const MAP_NUM = {
     WALL: 0,
     GATE: 1,
     DOOR: 2,

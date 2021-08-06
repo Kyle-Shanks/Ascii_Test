@@ -42,6 +42,12 @@ const setLevel = (mapId: number) => {
         lightMap = {}
         currentMap = mapId
         MAP = new Map(mapData[currentMap])
+        enemies = mapData[currentMap].enemies.map((info) => (
+            new Enemy(
+                { ...info, ...enemyStatsMap[info.enemyType] },
+                LOG_MANAGER,
+            )
+        ))
         PLAYER.setPosition(MAP.startPosition)
         CAMERA.resetPosition(PLAYER.position.subtract(new Vector2(0, 4))) // Fade in effect
         CAMERA.setPosition(PLAYER.position)
@@ -212,6 +218,8 @@ class InputWatcher implements InputObserver {
             // Check if the player is standing on a portal
             const entityAtPosition = MAP.getAtPosition(PLAYER.position)
             if (entityAtPosition?.type === ENTITY_TYPES.PORTAL) return nextLevel()
+
+            enemies.forEach((enemy) => enemy.update(MAP, PLAYER, enemies))
 
             // Update camera and recalculate light
             CAMERA.setPosition(PLAYER.position)
