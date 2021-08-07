@@ -19,6 +19,7 @@ let enemies: Enemy[] = mapData[currentMap].enemies.map((info) => (
     )
 ))
 
+const PLAYER_VISION = 7.5
 const PLAYER = new Player(
     {
         position: MAP.startPosition,
@@ -53,7 +54,7 @@ const setLevel = (mapId: number) => {
         LOG_MANAGER.addLog({ msg: `Now Entering: ${MAP.title}` })
     }
 
-    lightMap = calculateLight(PLAYER.position, 7.5)
+    lightMap = calculateLight(PLAYER.position, PLAYER_VISION)
 }
 
 // const prevLevel = () => setLevel(currentMap - 1) // Don't think I'll need this
@@ -121,21 +122,24 @@ const calculateLight = (pos: Vector2, strength: number): Record<string, boolean>
         let err = dx - dy
 
         while (true) {
-            if (!lightMap[`${start.x},${start.y}`] && !MAP.isPositionOutsideMap(start)) {
+            const withinDistance = start.distanceTo(pos) <= strength
+            if (
+                !lightMap[`${start.x},${start.y}`]
+                && withinDistance
+                && !MAP.isPositionOutsideMap(start)
+            ) {
                 lightMap[`${start.x},${start.y}`] = true
             }
 
+            if (start.isEqual(vec) || !withinDistance) break
             const entityAtPosition = MAP.getAtPosition(start)
             if (entityAtPosition?.isOpaque()) break
-            if (start.isEqual(vec)) break
 
-            const err2 = err * 2
-
-            if (err2 > -dy) {
+            if (err * 2 > -dy) {
                 err -= dy
                 start = start.add(sx)
             }
-            if (err2 < dx) {
+            if (err * 2 < dx) {
                 err += dx
                 start = start.add(sy)
             }
@@ -222,7 +226,7 @@ class InputWatcher implements InputObserver {
 
             // Update camera and recalculate light
             CAMERA.setPosition(PLAYER.position)
-            lightMap = calculateLight(PLAYER.position, 7.5)
+            lightMap = calculateLight(PLAYER.position, PLAYER_VISION)
         }
     }
 }
