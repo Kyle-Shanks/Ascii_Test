@@ -4,6 +4,7 @@ import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
 import { EnemyType } from 'src/core/enemyData'
+import { Vector2 } from 'src/core/types'
 
 const ENEMY_STATE = {
     IDLE: 'idle',
@@ -72,12 +73,28 @@ class Enemy extends Actor {
         return canSee
     }
 
+    private findFreeSpotAroundPlayer = (player: Player, map: Map, enemies: Enemy[]): Vector2 | null => {
+        const posArr = player.position.getAdjacent()
+        posArr.sort((a, b) => a.distanceTo(this.position) - b.distanceTo(this.position))
+
+        for (let i = 0; i < posArr.length; i++) {
+            const pos = posArr[i]
+            if (map.isPositionWalkable(pos) && enemies.every((enemy) => !enemy.position.isEqual(pos))) {
+                return pos
+            }
+        }
+
+        return null
+    }
+
     private moveTowardsPlayer = (player: Player, map: Map, enemies: Enemy[]) => {
-        const pathToPlayer = this.findPath(player.position, map)
+        // Find a free spot around the player to move towards, or just the player position
+        const pos = this.findFreeSpotAroundPlayer(player, map, enemies) ?? player.position
+        const pathToPlayer = this.findPath(pos, map)
+
         if (pathToPlayer && pathToPlayer.length > 1) {
-            const nextPosition = pathToPlayer[1]
-            const enemyAtPosition = enemies.some((enemy) => enemy.position.isEqual(nextPosition))
-            if (!enemyAtPosition) this.position = nextPosition
+            const nextPos = pathToPlayer[1]
+            if (enemies.every((enemy) => !enemy.position.isEqual(nextPos))) this.position = nextPos
         }
     }
 }

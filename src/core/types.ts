@@ -1,4 +1,12 @@
-// Common types
+// Actor Stats
+export type Stats = {
+    HP: number
+    ACC: number
+    STR: number
+    DEF: number
+}
+
+// Vector2
 export class Vector2 {
     x: number
     y: number
@@ -17,6 +25,10 @@ export class Vector2 {
     toString = (): string => `${this.x},${this.y}`
     length = (): number => this.distanceTo(Vector2.ZERO)
     normalize = (): Vector2 => this.divide(this.length())
+
+    getAdjacent = (): Vector2[] => (
+        [Vector2.UP, Vector2.LEFT, Vector2.DOWN, Vector2.RIGHT].map((dir) => dir.add(this))
+    )
 
     isEqual = (vec: Vector2): boolean => (
         this.x === vec.x && this.y === vec.y
@@ -103,12 +115,4 @@ export class Vector2 {
 
         return arr
     }
-}
-
-// Actor Stats type
-export type Stats = {
-    HP: number
-    ACC: number
-    STR: number
-    DEF: number
 }

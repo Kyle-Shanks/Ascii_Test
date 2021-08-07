@@ -90,8 +90,8 @@ class Map {
         }
         this.removeObject(door)
         // Look for adjacent tiles and remove if they are a door entity
-        const dirs = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
-        const objs = dirs.map((dir) => this.getAtPosition(door.position.add(dir)))
+        const posArr = door.position.getAdjacent()
+        const objs = posArr.map((pos) => this.getAtPosition(pos))
         objs.forEach((obj) => {
             if (obj?.type === ENTITY_TYPES.DOOR || obj?.type === ENTITY_TYPES.GATE) this.removeObject(obj)
         })

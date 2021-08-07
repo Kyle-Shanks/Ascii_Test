@@ -48,7 +48,6 @@ class Actor extends Entity {
     }
 
     protected findPath = (pos: Vector2, map: Map): Vector2[] | null => {
-        const dirs = [Vector2.UP, Vector2.LEFT, Vector2.DOWN, Vector2.RIGHT]
         const queue: PathNode[] = [{ position: this.position, cost: 0 }]
         const openSet: Record<string, true> = { [this.position.toString()]: true }
         const closedSet: Record<string, true> = {}
@@ -70,27 +69,24 @@ class Actor extends Entity {
                 return path
             }
 
-            // TODO: Work on this and try out different ways to optimize
-            // sort dirs by distance from target, or don't randomly
-            const sortedDirs = Math.random() > 0.5
-                ? dirs.sort((a, b) => a.diff(pos) - b.diff(pos))
-                : dirs
+            // sort positions by distance from target
+            const neighbors = currentNode.position.getAdjacent()
+            neighbors.sort((a, b) => a.diff(pos) - b.diff(pos))
 
             // Check neighbors
-            sortedDirs.forEach((dir) => {
-                const neighborPosition = currentNode.position.add(dir)
+            neighbors.forEach((pos) => {
                 if (
                     currentNode.cost + 1 >= 16
-                    || openSet[neighborPosition.toString()]
-                    || closedSet[neighborPosition.toString()]
-                    || !map.isPositionWalkable(neighborPosition)
+                    || openSet[pos.toString()]
+                    || closedSet[pos.toString()]
+                    || !map.isPositionWalkable(pos)
                 ) {
                     return
                 }
 
-                openSet[neighborPosition.toString()] = true
+                openSet[pos.toString()] = true
                 queue.push({
-                    position: neighborPosition,
+                    position: pos,
                     parent: currentNode,
                     // Based on heuristic_cost_estimate, but always 1 for grid based movement
                     cost: currentNode.cost + 1,
