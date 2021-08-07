@@ -28,7 +28,7 @@ class Map {
         this.objects = []
         this.solids = []
         this.opaques = []
-        this._getEntities()
+        this.getEntities()
     }
 
     draw = (lightMap: Record<string, boolean>) => {
@@ -97,7 +97,7 @@ class Map {
         })
     }
 
-    private _getEntities = () => {
+    private getEntities = () => {
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
                 const num = this.data[i][j]

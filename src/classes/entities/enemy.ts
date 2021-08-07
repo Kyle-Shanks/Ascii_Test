@@ -14,43 +14,51 @@ type EnemyState = typeof ENEMY_STATE[keyof typeof ENEMY_STATE]
 
 interface EnemyProps extends ActorProps {
     enemyType: EnemyType
+    moveSpeed: number
 }
 
 class Enemy extends Actor {
     enemyType: EnemyType
     state: EnemyState
+    moveSpeed: number
+    private moveTimer: number
 
     constructor(props: EnemyProps, logManager: LogManager) {
         super(props, logManager)
         this.type = ENTITY_TYPES.ENEMY
         this.enemyType = props.enemyType
         this.state = ENEMY_STATE.IDLE
+
+        this.moveSpeed = props.moveSpeed
+        this.moveTimer = 0
     }
 
     update = (map: Map, player: Player, enemies: Enemy[]) => {
         switch (this.state) {
             case ENEMY_STATE.IDLE:
-                if (this._canSeePlayer(player, map)) this.state = ENEMY_STATE.CHASE
+                if (this.canSeePlayer(player, map)) {
+                    this.moveTimer = 0
+                    this.state = ENEMY_STATE.CHASE
+                }
                 break
             case ENEMY_STATE.CHASE:
-                if (this._canAttackPlayer(player)) {
-                    this._attack(player)
-                } else if (this.position.distanceTo(player.position) > 8) {
-                    this.state = ENEMY_STATE.IDLE
-                } else {
-                    this._moveTowardsPlayer(player, map, enemies)
+                if (this.moveTimer === 0) {
+                    if (this.canAttackPlayer(player)) {
+                        this.attack(player)
+                    } else if (this.position.distanceTo(player.position) > 8) {
+                        this.state = ENEMY_STATE.IDLE
+                    } else {
+                        this.moveTowardsPlayer(player, map, enemies)
+                    }
                 }
+                this.moveTimer = (this.moveTimer + 1) % this.moveSpeed
                 break
         }
     }
 
-    private _canAttackPlayer = (player: Player): boolean => this.position.distanceTo(player.position) <= 1
-    // private _canAttackPlayer = (player: Player): boolean => {
-    //     const dirs = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
-    //     return dirs.map((dir) => this.position.add(dir)).some((pos) => pos.isEqual(player.position))
-    // }
+    private canAttackPlayer = (player: Player): boolean => this.position.distanceTo(player.position) <= 1
 
-    private _canSeePlayer = (player: Player, map: Map): boolean => {
+    private canSeePlayer = (player: Player, map: Map): boolean => {
         if (this.position.distanceTo(player.position) > 7) return false
 
         let canSee = true
@@ -64,8 +72,8 @@ class Enemy extends Actor {
         return canSee
     }
 
-    private _moveTowardsPlayer = (player: Player, map: Map, enemies: Enemy[]) => {
-        const pathToPlayer = this._findPath(player.position, map)
+    private moveTowardsPlayer = (player: Player, map: Map, enemies: Enemy[]) => {
+        const pathToPlayer = this.findPath(player.position, map)
         if (pathToPlayer && pathToPlayer.length > 1) {
             const nextPosition = pathToPlayer[1]
             const enemyAtPosition = enemies.some((enemy) => enemy.position.isEqual(nextPosition))

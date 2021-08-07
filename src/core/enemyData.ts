@@ -10,27 +10,28 @@ export type EnemyType = typeof ENEMY_TYPE[keyof typeof ENEMY_TYPE]
 
 type EnemyInfo = {
     char: EntityChar
+    moveSpeed: number
     stats: Stats
 }
 
 export const enemyStatsMap: Record<EnemyType, EnemyInfo> = {
     [ENEMY_TYPE.RAT]: {
         char: CHARS.R,
+        moveSpeed: 1,
         stats: {
             HP: 1,
             STR: 1,
             DEF: 0,
-            SPD: 1,
             ACC: 70,
         },
     },
     [ENEMY_TYPE.KOBOLD]: {
         char: CHARS.K,
+        moveSpeed: 2,
         stats: {
             HP: 3,
             STR: 1,
             DEF: 0,
-            SPD: 1,
             ACC: 80,
         },
     },

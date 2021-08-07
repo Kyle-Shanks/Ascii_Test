@@ -15,6 +15,8 @@ export class Vector2 {
     static RIGHT = new Vector2(1, 0)
 
     toString = (): string => `${this.x},${this.y}`
+    length = (): number => this.distanceTo(Vector2.ZERO)
+    normalize = (): Vector2 => this.divide(this.length())
 
     isEqual = (vec: Vector2): boolean => (
         this.x === vec.x && this.y === vec.y
@@ -31,12 +33,13 @@ export class Vector2 {
     divide = (num: number): Vector2 => (
         new Vector2(this.x / num, this.y / num)
     )
+
+    diff = (vec: Vector2): number => (
+        Math.abs(this.x - vec.x) + Math.abs(this.y - vec.y)
+    )
     lerp = (vec: Vector2, amt: number): Vector2 => (
         this.add(vec.subtract(this).multiply(amt))
     )
-
-    length = (): number => this.distanceTo(Vector2.ZERO)
-    normalize = (): Vector2 => this.divide(this.length())
     distanceTo = (vec: Vector2): number => (
         Math.sqrt((vec.x - this.x) ** 2 + (vec.y - this.y) ** 2)
     )
@@ -108,5 +111,4 @@ export type Stats = {
     ACC: number
     STR: number
     DEF: number
-    SPD: number
 }

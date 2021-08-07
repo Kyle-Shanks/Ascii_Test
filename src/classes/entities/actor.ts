@@ -37,7 +37,7 @@ class Actor extends Entity {
         this.health = Math.min(this.health + amount, this.stats.HP)
     }
 
-    protected _attack = (actor: Actor) => {
+    protected attack = (actor: Actor) => {
         const rand = Math.random() * 100
 
         // TODO: Log miss
@@ -47,7 +47,7 @@ class Actor extends Entity {
         actor.takeDamage(this.stats.STR)
     }
 
-    protected _findPath = (pos: Vector2, map: Map): Vector2[] | null => {
+    protected findPath = (pos: Vector2, map: Map): Vector2[] | null => {
         const dirs = [Vector2.UP, Vector2.LEFT, Vector2.DOWN, Vector2.RIGHT]
         const queue: PathNode[] = [{ position: this.position, cost: 0 }]
         const openSet: Record<string, true> = { [this.position.toString()]: true }
@@ -71,8 +71,10 @@ class Actor extends Entity {
             }
 
             // TODO: Work on this and try out different ways to optimize
-            // sort dirs by distance from target
-            const sortedDirs = dirs.sort((a, b) => a.distanceTo(pos) - b.distanceTo(pos))
+            // sort dirs by distance from target, or don't randomly
+            const sortedDirs = Math.random() > 0.5
+                ? dirs.sort((a, b) => a.diff(pos) - b.diff(pos))
+                : dirs
 
             // Check neighbors
             sortedDirs.forEach((dir) => {

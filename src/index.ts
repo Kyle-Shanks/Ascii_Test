@@ -27,7 +27,6 @@ const PLAYER = new Player(
             ACC: 85,
             STR: 1,
             DEF: 0,
-            SPD: 1,
         }
     },
     LOG_MANAGER,

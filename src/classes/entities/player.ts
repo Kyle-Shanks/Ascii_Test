@@ -91,7 +91,7 @@ class Player extends Actor {
 
     private _walkInto = (entity: Entity) => {
         if (entity instanceof Enemy) {
-            this._attack(entity)
+            this.attack(entity)
         } else {
             // Do things based on type here
             switch (entity.type) {}
