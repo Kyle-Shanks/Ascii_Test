@@ -1,5 +1,6 @@
 import Actor, { ActorProps } from 'src/classes/entities/actor'
 import Player from 'src/classes/entities/player'
+import EventManager from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
@@ -24,8 +25,8 @@ class Enemy extends Actor {
     moveSpeed: number
     private moveTimer: number
 
-    constructor(props: EnemyProps, logManager: LogManager) {
-        super(props, logManager)
+    constructor(props: EnemyProps, logManager: LogManager, eventManager: EventManager) {
+        super(props, logManager, eventManager)
         this.type = ENTITY_TYPES.ENEMY
         this.enemyType = props.enemyType
         this.state = ENEMY_STATE.IDLE
@@ -60,7 +61,7 @@ class Enemy extends Actor {
     private canAttackPlayer = (player: Player): boolean => this.position.distanceTo(player.position) <= 1
 
     private canSeePlayer = (player: Player, map: Map): boolean => {
-        if (this.position.distanceTo(player.position) > 7) return false
+        if (this.position.distanceTo(player.position) > this.vision) return false
 
         let canSee = true
         const pathToPlayer = this.position.bresenham(player.position).slice(0, -1)

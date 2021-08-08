@@ -1,4 +1,5 @@
 import Entity, { EntityProps } from 'src/classes/entities/entity'
+import EventManager, { GAME_EVENT_TYPE } from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
@@ -12,20 +13,26 @@ type PathNode = {
 
 export interface ActorProps extends EntityProps {
     stats: Stats
+    vision: number
 }
 
 class Actor extends Entity {
     health: number
     stats: Stats
+    vision: number
     update!: Function
     protected logManager: LogManager
+    protected eventManager: EventManager
 
-    constructor(props: ActorProps, logManager: LogManager) {
+    constructor(props: ActorProps, logManager: LogManager, eventManager: EventManager) {
         super(props)
         this.health = props.stats.HP
         this.stats = props.stats
+        this.vision = props.vision
         this.type = ENTITY_TYPES.ACTOR
+
         this.logManager = logManager
+        this.eventManager = eventManager
     }
 
     takeDamage = (dmg: number) => {
@@ -38,13 +45,14 @@ class Actor extends Entity {
     }
 
     protected attack = (actor: Actor) => {
-        const rand = Math.random() * 100
-
         // TODO: Log miss
-        if (this.stats.ACC < rand) return
+        if (this.stats.ACC < (Math.random() * 100)) return
 
         // TODO: Log Hit
         actor.takeDamage(this.stats.STR)
+
+        // If player got hit, dispatch hit event
+        if (actor.type === ENTITY_TYPES.PLAYER) this.eventManager.dispatch(GAME_EVENT_TYPE.HIT)
     }
 
     protected findPath = (pos: Vector2, map: Map): Vector2[] | null => {
@@ -71,7 +79,7 @@ class Actor extends Entity {
 
             // sort positions by distance from target
             const neighbors = currentNode.position.getAdjacent()
-            neighbors.sort((a, b) => a.diff(pos) - b.diff(pos))
+            neighbors.sort((a, b) => a.distanceTo(pos) - b.distanceTo(pos))
 
             // Check neighbors
             neighbors.forEach((pos) => {

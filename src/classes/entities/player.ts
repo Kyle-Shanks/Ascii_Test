@@ -2,6 +2,7 @@ import Actor, { ActorProps } from 'src/classes/entities/actor'
 import Enemy from 'src/classes/entities/enemy'
 import Entity from 'src/classes/entities/entity'
 import { InputEvent, InputKey } from 'src/classes/input'
+import EventManager from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
@@ -23,8 +24,8 @@ class Player extends Actor {
     private _releaseActionMap: ActionMap
     inventory: Inventory
 
-    constructor(props: PlayerProps, logManager: LogManager) {
-        super(props, logManager)
+    constructor(props: PlayerProps, logManager: LogManager, eventManager: EventManager) {
+        super(props, logManager, eventManager)
         this.type = ENTITY_TYPES.PLAYER
 
         this.inventory = {

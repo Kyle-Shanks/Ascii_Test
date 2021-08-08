@@ -49,7 +49,7 @@ export class Vector2 {
     diff = (vec: Vector2): number => (
         Math.abs(this.x - vec.x) + Math.abs(this.y - vec.y)
     )
-    lerp = (vec: Vector2, amt: number): Vector2 => (
+    lerp = (vec: Vector2, amt: number = 0.1): Vector2 => (
         this.add(vec.subtract(this).multiply(amt))
     )
     distanceTo = (vec: Vector2): number => (

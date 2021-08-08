@@ -1,13 +1,14 @@
 import { InputEvent, InputObserver } from 'src/classes/input'
 import Map from 'src/classes/map'
 import Enemy from 'src/classes/entities/enemy'
+import { GAME_EVENT_TYPE } from 'src/classes/eventManager'
 import Player from 'src/classes/entities/player'
 import { THEME_COLOR } from 'src/classes/theme'
 import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE, ENTITY_TYPES } from 'src/core/constants'
 import { enemyStatsMap } from 'src/core/enemyData'
 import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
-import { CAMERA, INPUT, LOG_MANAGER, THEME_MANAGER } from 'src/globals'
+import { CAMERA, EVENT_MANAGER, INPUT, LOG_MANAGER, THEME_MANAGER } from 'src/globals'
 
 let lightMap: Record<string, boolean> = {}
 let currentMap: number = 0
@@ -16,21 +17,23 @@ let enemies: Enemy[] = mapData[currentMap].enemies.map((info) => (
     new Enemy(
         {...info, ...enemyStatsMap[info.enemyType]},
         LOG_MANAGER,
+        EVENT_MANAGER,
     )
 ))
 
-const PLAYER_VISION = 7.5
 const PLAYER = new Player(
     {
         position: MAP.startPosition,
+        vision: 7.5,
         stats: {
-            HP: 4,
-            ACC: 85,
-            STR: 1,
+            HP: 10,
+            STR: 3,
             DEF: 0,
+            ACC: 85,
         }
     },
     LOG_MANAGER,
+    EVENT_MANAGER,
 )
 
 // Level functions
@@ -46,6 +49,7 @@ const setLevel = (mapId: number) => {
             new Enemy(
                 { ...info, ...enemyStatsMap[info.enemyType] },
                 LOG_MANAGER,
+                EVENT_MANAGER,
             )
         ))
         PLAYER.setPosition(MAP.startPosition)
@@ -54,7 +58,7 @@ const setLevel = (mapId: number) => {
         LOG_MANAGER.addLog({ msg: `Now Entering: ${MAP.title}` })
     }
 
-    lightMap = calculateLight(PLAYER.position, PLAYER_VISION)
+    lightMap = calculateLight(PLAYER.position, PLAYER.vision)
 }
 
 // const prevLevel = () => setLevel(currentMap - 1) // Don't think I'll need this
@@ -226,7 +230,7 @@ class InputWatcher implements InputObserver {
 
             // Update camera and recalculate light
             CAMERA.setPosition(PLAYER.position)
-            lightMap = calculateLight(PLAYER.position, PLAYER_VISION)
+            lightMap = calculateLight(PLAYER.position, PLAYER.vision)
         }
     }
 }
@@ -237,6 +241,10 @@ INPUT.listen()
 
 const init = () => {
     setLevel(0)
+    EVENT_MANAGER.addHandler({
+        type: GAME_EVENT_TYPE.HIT,
+        func: () => CAMERA.shake(),
+    })
     LOG_MANAGER.addLog({ msg: `Welcome to the Dungeon` })
     frame()
 }
