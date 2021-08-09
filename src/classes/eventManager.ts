@@ -1,14 +1,16 @@
 export const GAME_EVENT_TYPE = {
-    HIT: 'hit'
+    PLAYER_DAMAGED: 'player_damaged',
+    PLAYER_ACTION: 'player_action',
+    PLAYER_MOVE: 'player_move',
 } as const
 
 type GameEventType = typeof GAME_EVENT_TYPE[keyof typeof GAME_EVENT_TYPE]
 
-export type GameEvent = {
+type GameEvent = {
     type: GameEventType
 }
 
-export type GameEventHandler = {
+type GameEventHandler = {
     type: GameEventType
     func: Function
 }

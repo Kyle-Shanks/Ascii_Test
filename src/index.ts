@@ -203,35 +203,12 @@ const draw = () => {
     drawUI()
 }
 
+// Watch Input
 class InputWatcher implements InputObserver {
     readonly id = 'inputWatcher1'
 
     update = (event: InputEvent) => {
         PLAYER.handleInput(event, MAP, enemies)
-        // TODO: Check if player if alive here
-
-        if (event.type === 'press') {
-            // TODO: Add something to keep track of if the player moved
-
-            const deadEnemyArr: number[] = []
-            enemies.forEach((enemy, idx) => {
-                if (enemy.health === 0) {
-                    LOG_MANAGER.addLog({ msg: `${enemy.enemyType} died.` })
-                    deadEnemyArr.push(idx)
-                }
-            })
-            enemies = enemies.filter((_, idx) => !deadEnemyArr.includes(idx))
-
-            // Check if the player is standing on a portal
-            const entityAtPosition = MAP.getAtPosition(PLAYER.position)
-            if (entityAtPosition?.type === ENTITY_TYPES.PORTAL) return nextLevel()
-
-            enemies.forEach((enemy) => enemy.update(MAP, PLAYER, enemies))
-
-            // Update camera and recalculate light
-            CAMERA.setPosition(PLAYER.position)
-            lightMap = calculateLight(PLAYER.position, PLAYER.vision)
-        }
     }
 }
 
@@ -239,11 +216,59 @@ const inputWatcher = new InputWatcher()
 INPUT.subscribe(inputWatcher)
 INPUT.listen()
 
+// Handler game events
+const checkForDeadEnemies = () => {
+    const deadEnemyArr: number[] = []
+    enemies.forEach((enemy, idx) => {
+        if (enemy.health === 0) {
+            LOG_MANAGER.addLog({ msg: `${enemy.enemyType} died.` })
+            deadEnemyArr.push(idx)
+        }
+    })
+    enemies = enemies.filter((_, idx) => !deadEnemyArr.includes(idx))
+}
+
+const onPlayerAction = () => {
+    // Have enemies move
+    enemies.forEach((enemy) => enemy.update(MAP, PLAYER, enemies))
+
+    // Recalculate light
+    lightMap = calculateLight(PLAYER.position, PLAYER.vision)
+}
+
+const onPlayerMove = () => {
+    checkForDeadEnemies()
+
+    // Check if the player is standing on a portal
+    const entityAtPosition = MAP.getAtPosition(PLAYER.position)
+    if (entityAtPosition?.type === ENTITY_TYPES.PORTAL) return nextLevel()
+
+    // Update camera
+    CAMERA.setPosition(PLAYER.position)
+
+    onPlayerAction()
+}
+
+const onPlayerDamaged = () => {
+    CAMERA.shake()
+
+    // TODO: Check if player if alive here
+}
+
+// Initialize function
 const init = () => {
     setLevel(0)
     EVENT_MANAGER.addHandler({
-        type: GAME_EVENT_TYPE.HIT,
-        func: () => CAMERA.shake(),
+        type: GAME_EVENT_TYPE.PLAYER_DAMAGED,
+        func: onPlayerDamaged,
+    })
+    EVENT_MANAGER.addHandler({
+        type: GAME_EVENT_TYPE.PLAYER_MOVE,
+        func: onPlayerMove,
+    })
+    EVENT_MANAGER.addHandler({
+        type: GAME_EVENT_TYPE.PLAYER_ACTION,
+        func: onPlayerAction,
     })
     LOG_MANAGER.addLog({ msg: `Welcome to the Dungeon` })
     frame()

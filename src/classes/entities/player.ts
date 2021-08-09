@@ -2,7 +2,7 @@ import Actor, { ActorProps } from 'src/classes/entities/actor'
 import Enemy from 'src/classes/entities/enemy'
 import Entity from 'src/classes/entities/entity'
 import { InputEvent, InputKey } from 'src/classes/input'
-import EventManager from 'src/classes/eventManager'
+import EventManager, { GAME_EVENT_TYPE } from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
@@ -73,6 +73,7 @@ class Player extends Actor {
 
         // Update position if nothing solid is in the way
         this.position = newPosition
+        this.eventManager.dispatch(GAME_EVENT_TYPE.PLAYER_MOVE)
 
         // If player walked over something, check it out
         if (entityAtPosition) {
@@ -93,6 +94,7 @@ class Player extends Actor {
     private _walkInto = (entity: Entity) => {
         if (entity instanceof Enemy) {
             this.attack(entity)
+            this.eventManager.dispatch(GAME_EVENT_TYPE.PLAYER_MOVE)
         } else {
             // Do things based on type here
             switch (entity.type) {}
@@ -102,6 +104,7 @@ class Player extends Actor {
     private _interact = (map: Map, enemies: Enemy[]) => {
         const dirs = [Vector2.ZERO, Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT] // May not need Vector2.ZERO here?
         const entities = dirs.map((dir) => map.getAtPosition(this.position.add(dir)))
+        let interaction = false
 
         entities.forEach((entity) => {
             if (entity !== null) {
@@ -111,12 +114,14 @@ class Player extends Actor {
                         break
                     case ENTITY_TYPES.GATE:
                         map.openDoor(entity)
+                        interaction = true
                         break
                     case ENTITY_TYPES.DOOR:
                         if (this.inventory[ENTITY_TYPES.KEY] > 0) {
                             this.inventory[ENTITY_TYPES.KEY]--
                             map.openDoor(entity)
                             this.logManager.addLog({ msg: 'You unlocked the door with a key!' })
+                            interaction = true
                         } else {
                             this.logManager.addLog({ msg: 'The door is locked.' })
                         }
@@ -124,6 +129,8 @@ class Player extends Actor {
                 }
             }
         })
+
+        if (interaction) this.eventManager.dispatch(GAME_EVENT_TYPE.PLAYER_ACTION)
     }
 }
 

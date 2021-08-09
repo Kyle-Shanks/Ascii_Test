@@ -36,8 +36,9 @@ class Actor extends Entity {
     }
 
     takeDamage = (dmg: number) => {
-        // TODO: Need to implement DEF stat here
-        this.health = Math.max(this.health - dmg, 0)
+        // TODO: Need better/more sophisticated implementation of DEF
+        const absDmg = Math.max(dmg - this.stats.DEF, 0)
+        this.health = Math.max(this.health - absDmg, 0)
     }
 
     heal = (amount: number) => {
@@ -50,9 +51,8 @@ class Actor extends Entity {
 
         // TODO: Log Hit
         actor.takeDamage(this.stats.STR)
-
         // If player got hit, dispatch hit event
-        if (actor.type === ENTITY_TYPES.PLAYER) this.eventManager.dispatch(GAME_EVENT_TYPE.HIT)
+        if (actor.type === ENTITY_TYPES.PLAYER) this.eventManager.dispatch(GAME_EVENT_TYPE.PLAYER_DAMAGED)
     }
 
     protected findPath = (pos: Vector2, map: Map): Vector2[] | null => {
