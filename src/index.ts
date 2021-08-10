@@ -104,13 +104,6 @@ const drawGrid = (gridSize = GRID_SIZE) => {
     }
 }
 
-const drawEnemies = () => {
-    enemies.forEach((enemy) => {
-        const key = `${enemy.position.x},${enemy.position.y}`
-        if (lightMap[key]) enemy.draw()
-    })
-}
-
 // Calculate light at a position
 const calculateLight = (pos: Vector2, strength: number): Record<string, boolean> => {
     const posArr = pos.getWithinDistance(strength)
@@ -128,11 +121,11 @@ const calculateLight = (pos: Vector2, strength: number): Record<string, boolean>
         while (true) {
             const withinDistance = start.distanceTo(pos) <= strength
             if (
-                !lightMap[`${start.x},${start.y}`]
+                !lightMap[start.toString()]
                 && withinDistance
                 && !MAP.isPositionOutsideMap(start)
             ) {
-                lightMap[`${start.x},${start.y}`] = true
+                lightMap[start.toString()] = true
             }
 
             if (start.isEqual(vec) || !withinDistance) break
@@ -196,10 +189,12 @@ const drawUI = () => {
 
 const draw = () => {
     drawBackground()
-    drawLight(lightMap)
     MAP.draw(lightMap)
-    drawEnemies()
+    enemies.forEach((enemy) => {
+        if (lightMap[enemy.position.toString()]) enemy.draw()
+    })
     PLAYER.draw()
+    drawLight(lightMap)
     drawUI()
 }
 

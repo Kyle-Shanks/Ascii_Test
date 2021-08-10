@@ -83,8 +83,8 @@ const mapData: MapInfo[] = [
             [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,3,_,0],
             [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
             [0,_,_,_,_,_,_,0,0,0,2,2,0,0,0,_,_,_,_,_,0],
-            [0,_,_,_,_,_,_,0,_,5,5,5,5,_,0,_,_,_,4,_,0],
-            [0,_,_,_,_,_,_,0,_,5,5,5,5,_,0,_,_,_,_,_,0],
+            [0,_,_,_,_,_,_,0,5,5,5,5,5,5,0,_,_,_,4,_,0],
+            [0,_,_,_,_,_,_,0,5,5,5,5,5,5,0,_,_,_,_,_,0],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         ],
     },
@@ -131,7 +131,152 @@ const mapData: MapInfo[] = [
     {
         title: 'Open Test Level',
         startPosition: new Vector2(19, 14),
-        enemies: [],
+        enemies: [
+            {
+                position: new Vector2(4, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(8, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(12, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(16, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(20, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(24, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(28, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(32, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(36, 4),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(4, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(8, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(12, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(16, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(20, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(24, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(28, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(32, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(36, 8),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(4, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(8, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(12, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(16, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(20, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(24, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(28, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(32, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(36, 18),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(4, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(8, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(12, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(16, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(20, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(24, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(28, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(32, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+            {
+                position: new Vector2(36, 22),
+                enemyType: ENEMY_TYPE.ZOMBIE
+            },
+        ],
         data: [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],

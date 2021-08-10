@@ -110,6 +110,11 @@ class Entity {
         if (this.isOutsideGrid()) return
         const drawPos = this.position.multiply(GRID_SIZE).subtract(CAMERA.absPosition)
 
+        if (this.type === ENTITY_TYPES.PLAYER || this.type === ENTITY_TYPES.ENEMY) {
+            CTX.fillStyle = THEME_MANAGER.getColors()['background']
+            CTX.fillRect(drawPos.x + GRID_SIZE / 2, drawPos.y + GRID_SIZE / 2, GRID_SIZE, GRID_SIZE)
+        }
+
         CTX.fillStyle = THEME_MANAGER.getColors()[color || TYPE_SETTINGS_MAP[this.type].color]
         CTX.font = `${GRID_SIZE}px Andale Mono`
         CTX.textAlign = 'center'

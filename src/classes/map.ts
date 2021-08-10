@@ -33,7 +33,7 @@ class Map {
 
     draw = (lightMap: Record<string, boolean>) => {
         this.entities.forEach((entity) => {
-            const key = `${entity.position.x},${entity.position.y}`
+            const key = entity.position.toString()
             if (lightMap[key]) {
                 entity.draw()
                 this.seenMap[key] = true
