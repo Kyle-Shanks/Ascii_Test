@@ -1,3 +1,6 @@
+// General purpose types
+export type NumMatrix = (number | null)[][]
+
 // Actor Stats
 export type Stats = {
     HP: number
@@ -8,8 +11,8 @@ export type Stats = {
 
 // Vector2
 export class Vector2 {
-    x: number
-    y: number
+    readonly x: number
+    readonly y: number
 
     constructor(x: number, y: number) {
         this.x = x

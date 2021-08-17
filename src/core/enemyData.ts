@@ -42,7 +42,7 @@ export const enemyStatsMap: Record<EnemyType, EnemyInfo> = {
     [ENEMY_TYPE.ZOMBIE]: {
         char: CHARS.Z,
         moveSpeed: 2,
-        vision: 7,
+        vision: 6,
         stats: {
             HP: 6,
             STR: 4,
