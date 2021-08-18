@@ -54,7 +54,7 @@ const insertIntoMatrix = (piece: NumMatrix, matrix: NumMatrix, pos: Vector2 = Ve
     })
 }
 
-const generateMap = (size: number = 34): [MapData, Vector2] => {
+const generateMap = (size: number = 40): [MapData, Vector2] => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
     const roomFillArr: { room: Room, dirs: string[] }[] = []
@@ -97,6 +97,7 @@ const generateMap = (size: number = 34): [MapData, Vector2] => {
                     rooms.some(r => r.isCollided(insertRoom))
                     || insertRoom.position.x < 0
                     || insertRoom.position.y < 0
+                    || insertRoom.position.x + insertRoom.width >= map[0].length
                 ) {
                     if (count >= 5) {
                         skip = true
@@ -128,6 +129,7 @@ const generateMap = (size: number = 34): [MapData, Vector2] => {
                     rooms.some(r => r.isCollided(insertRoom))
                     || insertRoom.position.x < 0
                     || insertRoom.position.y < 0
+                    || insertRoom.position.y + insertRoom.height >= map.length
                 ) {
                     if (count >= 5) {
                         skip = true
@@ -157,8 +159,8 @@ const generateMap = (size: number = 34): [MapData, Vector2] => {
 
                 while (
                     rooms.some(r => r.isCollided(insertRoom))
-                    || insertRoom.position.x + insertRoom.width + 1 >= map[0].length
-                    || insertRoom.position.y + insertRoom.height + 1 >= map.length
+                    || insertRoom.position.x + insertRoom.width >= map[0].length
+                    || insertRoom.position.y + insertRoom.height >= map.length
                 ) {
                     if (count >= 5) {
                         skip = true
@@ -187,8 +189,8 @@ const generateMap = (size: number = 34): [MapData, Vector2] => {
 
                 while (
                     rooms.some(r => r.isCollided(insertRoom))
-                    || insertRoom.position.x + insertRoom.width + 1 >= map[0].length
-                    || insertRoom.position.y + insertRoom.height + 1 >= map.length
+                    || insertRoom.position.x + insertRoom.width >= map[0].length
+                    || insertRoom.position.y + insertRoom.height >= map.length
                 ) {
                     if (count >= 5) {
                         skip = true
@@ -216,11 +218,19 @@ const generateMap = (size: number = 34): [MapData, Vector2] => {
         if (roomFillInfo.dirs.length === 0) roomFillArr.splice(roomFillArr.indexOf(roomFillInfo), 1)
     }
 
-    console.log({ rooms, map, spawn: startingRoom.spawnPoint })
     return [map, startingRoom.spawnPoint]
 }
 
-const [getMapData, genStartPos] = generateMap()
+const MAP_SIZE = {
+    XS: 24,
+    S: 32,
+    M: 48,
+    L: 64,
+    XL: 92,
+    XXL: 128,
+}
+
+const [getMapData, genStartPos] = generateMap(MAP_SIZE.S)
 
 const mapData: MapInfo[] = [
     {
