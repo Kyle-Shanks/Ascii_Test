@@ -1,5 +1,8 @@
 import { Vector2 } from 'src/core/types'
 
+// To make the map data visually easier to read
+const _ = null
+
 export const ROOM_TYPE = {
     MINI: 'mini',
     SMALL: 'small',
@@ -18,12 +21,6 @@ export type RoomInfo = {
     enemySpawnPoints: Vector2[]
     data: RoomData
 }
-
-// To make the map data visually easier to read
-const _ = null
-
-// Ideas
-// - Openings for rooms should be procedurally added based on room size and adjacent rooms
 
 // const roomData: Record<RoomType, RoomInfo[]> = {
 const roomData: RoomInfo[] = [

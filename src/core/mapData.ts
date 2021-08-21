@@ -1,8 +1,11 @@
 import Room from 'src/classes/room'
 import { ENTITY_TYPES, EntityType } from 'src/core/constants'
 import { EnemyType, ENEMY_TYPE } from 'src/core/enemyData'
-import roomData from 'src/core/roomData'
+import roomData, { RoomInfo } from 'src/core/roomData'
 import { NumMatrix, Vector2 } from 'src/core/types'
+
+// To make the map data visually easier to read
+const _ = null
 
 const MAP_SIZE = {
     XS: 24,
@@ -48,9 +51,6 @@ export type MapInfo = {
     title: string
 }
 
-// To make the map data visually easier to read
-const _ = null
-
 const insertIntoMatrix = (piece: NumMatrix, matrix: NumMatrix, pos: Vector2 = Vector2.ZERO) => {
     piece.forEach((row, y) => {
         const yPos = y + pos.y
@@ -63,16 +63,77 @@ const insertIntoMatrix = (piece: NumMatrix, matrix: NumMatrix, pos: Vector2 = Ve
     })
 }
 
+const getRoomToInsert = (
+    dir: Vector2,
+    anchorRoomInfo: { room: Room, dirs: Vector2[], distance: number },
+    rooms: Room[],
+    map: MapData,
+): Room | null => {
+    let count = 0
+    let skip = false
+    let insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
+    let insertRoom = new Room(insertRoomInfo, Vector2.ZERO)
+
+    const getInsertPos = (dir: Vector2, roomInfo: RoomInfo): Vector2 => {
+        switch (dir) {
+            case Vector2.UP:
+            case Vector2.LEFT:
+                return anchorRoomInfo.room.position.add(
+                    new Vector2(
+                        dir.x * roomInfo.data[0].length,
+                        dir.y * roomInfo.data.length
+                    )
+                )
+            case Vector2.RIGHT:
+            case Vector2.DOWN:
+                return anchorRoomInfo.room.position.add(
+                    new Vector2(
+                        dir.x * anchorRoomInfo.room.width,
+                        dir.y * anchorRoomInfo.room.height
+                    )
+                )
+            default:
+                console.error('Invalid direction in getInsertPos')
+                return Vector2.ZERO
+        }
+    }
+
+    // Try to place a few different rooms
+    let insertPos = getInsertPos(dir, insertRoomInfo)
+    insertRoom = new Room(insertRoomInfo, insertPos)
+
+    // Check the bounds of the room and make sure its not colliding with other rooms
+    while (
+        rooms.some(r => r.isCollided(insertRoom))
+        || insertRoom.position.x < 0
+        || insertRoom.position.y < 0
+        || insertRoom.position.x + insertRoom.width >= map[0].length
+        || insertRoom.position.y + insertRoom.height >= map.length
+    ) {
+        if (count >= 5) {
+            skip = true
+            break
+        }
+        insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
+        insertPos = getInsertPos(dir, insertRoomInfo)
+        insertRoom = new Room(insertRoomInfo, insertPos)
+        count++
+    }
+
+    return !skip ? new Room(insertRoomInfo, insertRoom.position.subtract(dir)) : null
+}
+
 const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
-    const roomFillArr: { room: Room, dirs: string[], distance: number }[] = []
-    const dirs = ['UP', 'LEFT', 'RIGHT', 'DOWN']
+    const roomFillArr: { room: Room, dirs: Vector2[], distance: number }[] = []
 
+    // Create starting room
     let startRandPos = new Vector2(Math.floor(Math.random() * size), Math.floor(Math.random() * size))
     let startRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
     let startingRoom = new Room(startRoomInfo, startRandPos)
 
+    // Make sure the starting room fits in the map
     while (
         startingRoom.position.x + startingRoom.width >= map[0].length
         || startingRoom.position.y + startingRoom.height >= map.length
@@ -81,189 +142,103 @@ const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
         startingRoom = new Room(startRoomInfo, startRandPos)
     }
 
+    // Add the starting room data to the map
     insertIntoMatrix(startingRoom.data, map, startingRoom.position)
     rooms.push(startingRoom)
-    roomFillArr.push({ room: startingRoom, dirs: dirs.slice(), distance: 0 })
+    roomFillArr.push({
+        room: startingRoom,
+        dirs: [Vector2.UP, Vector2.LEFT, Vector2.RIGHT, Vector2.DOWN],
+        distance: 0,
+    })
 
+    // Keep track of the furthest room from the starting room
     let furthestRoom = startingRoom
     let furthestDistance = 0
 
     while (roomFillArr.length) {
-        // Get random room info
-        const roomFillInfo = roomFillArr[Math.floor(Math.random() * roomFillArr.length)]
-        // Get a random direction
-        const dir = roomFillInfo.dirs.splice(Math.floor(Math.random() * roomFillInfo.dirs.length), 1)[0]
+        // Get random room info to insert new room around
+        const anchorRoomInfo = roomFillArr[Math.floor(Math.random() * roomFillArr.length)]
+        // Get a random direction around room
+        const dir = anchorRoomInfo.dirs.splice(Math.floor(Math.random() * anchorRoomInfo.dirs.length), 1)[0]
+        // Get new room to insert
+        const newRoom = getRoomToInsert(dir, anchorRoomInfo, rooms, map)
 
-        let count = 0
-        let skip = false
-        let insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
-        let insertRoom = new Room(insertRoomInfo, Vector2.ZERO)
-
-        switch (dir) {
-            case dirs[0]: { // UP
-                // try to place a few different rooms above the room
-                let insertPos = roomFillInfo.room.position.subtract(new Vector2(0, insertRoomInfo.data.length))
-                insertRoom = new Room(insertRoomInfo, insertPos)
-
-                while (
-                    rooms.some(r => r.isCollided(insertRoom))
-                    || insertRoom.position.x < 0
-                    || insertRoom.position.y < 0
-                    || insertRoom.position.x + insertRoom.width >= map[0].length
-                ) {
-                    if (count >= 5) {
-                        skip = true
-                        break
-                    }
-                    insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
-                    insertPos = roomFillInfo.room.position.subtract(new Vector2(0, insertRoomInfo.data.length))
-                    insertRoom = new Room(insertRoomInfo, insertPos)
-                    count++
-                }
-
-                // Add room
-                if (!skip) {
-                    const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.UP))
-                    rooms.push(correctPosRoom)
+        // Add new room
+        if (newRoom) {
+            switch (dir) {
+                case Vector2.UP: {
+                    rooms.push(newRoom)
                     roomFillArr.push({
-                        room: correctPosRoom,
-                        dirs: ['UP', 'LEFT', 'RIGHT'],
-                        distance: roomFillInfo.distance + 1,
+                        room: newRoom,
+                        dirs: [Vector2.UP, Vector2.LEFT, Vector2.RIGHT],
+                        distance: anchorRoomInfo.distance + 1,
                     })
-                    insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
+                    insertIntoMatrix(newRoom.data, map, newRoom.position)
                     // Poke a hole and add a gate to the right of the room
-                    map[correctPosRoom.position.y + correctPosRoom.height - 1][correctPosRoom.position.x + 2] = MAP_NUM.GATE
+                    map[newRoom.position.y + newRoom.height - 1][newRoom.position.x + 2] = MAP_NUM.GATE
 
-                    if (roomFillInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = roomFillInfo.distance + 1
-                        furthestRoom = correctPosRoom
+                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = anchorRoomInfo.distance + 1
+                        furthestRoom = newRoom
                     }
+                    break
                 }
-                break
-            }
-            case dirs[1]: { // LEFT
-                // try to place a few different rooms to the left of the room
-                let insertPos = roomFillInfo.room.position.subtract(new Vector2(insertRoomInfo.data[0].length, 0))
-                insertRoom = new Room(insertRoomInfo, insertPos)
-
-                while (
-                    rooms.some(r => r.isCollided(insertRoom))
-                    || insertRoom.position.x < 0
-                    || insertRoom.position.y < 0
-                    || insertRoom.position.y + insertRoom.height >= map.length
-                ) {
-                    if (count >= 5) {
-                        skip = true
-                        break
-                    }
-                    insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
-                    insertPos = roomFillInfo.room.position.subtract(new Vector2(insertRoomInfo.data[0].length, 0))
-                    insertRoom = new Room(insertRoomInfo, insertPos)
-                    count++
-                }
-
-                // Add room
-                if (!skip) {
-                    const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.LEFT))
-                    rooms.push(correctPosRoom)
+                case Vector2.LEFT: {
+                    rooms.push(newRoom)
                     roomFillArr.push({
-                        room: correctPosRoom,
-                        dirs: ['UP', 'LEFT', 'DOWN'],
-                        distance: roomFillInfo.distance + 1,
+                        room: newRoom,
+                        dirs: [Vector2.UP, Vector2.LEFT, Vector2.DOWN],
+                        distance: anchorRoomInfo.distance + 1,
                     })
-                    insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
+                    insertIntoMatrix(newRoom.data, map, newRoom.position)
                     // Poke a hole and add a gate to the right of the room
-                    map[correctPosRoom.position.y + 2][correctPosRoom.position.x + correctPosRoom.width - 1] = MAP_NUM.GATE
+                    map[newRoom.position.y + 2][newRoom.position.x + newRoom.width - 1] = MAP_NUM.GATE
 
-                    if (roomFillInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = roomFillInfo.distance + 1
-                        furthestRoom = correctPosRoom
+                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = anchorRoomInfo.distance + 1
+                        furthestRoom = newRoom
                     }
+                    break
                 }
-                break
-            }
-            case dirs[2]: { // RIGHT
-                // try to place a few different rooms to the right of the room
-                const insertPos = roomFillInfo.room.position.add(new Vector2(roomFillInfo.room.width, 0))
-                insertRoom = new Room(insertRoomInfo, insertPos)
-
-                while (
-                    rooms.some(r => r.isCollided(insertRoom))
-                    || insertRoom.position.x + insertRoom.width >= map[0].length
-                    || insertRoom.position.y + insertRoom.height >= map.length
-                ) {
-                    if (count >= 5) {
-                        skip = true
-                        break
-                    }
-                    insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
-                    insertRoom = new Room(insertRoomInfo, insertPos)
-                    count++
-                }
-
-                // Add room
-                if (!skip) {
-                    const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.RIGHT))
-                    rooms.push(correctPosRoom)
+                case Vector2.RIGHT: {
+                    rooms.push(newRoom)
                     roomFillArr.push({
-                        room: correctPosRoom,
-                        dirs: ['UP', 'RIGHT', 'DOWN'],
-                        distance: roomFillInfo.distance + 1,
+                        room: newRoom,
+                        dirs: [Vector2.UP, Vector2.RIGHT, Vector2.DOWN],
+                        distance: anchorRoomInfo.distance + 1,
                     })
-                    insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
+                    insertIntoMatrix(newRoom.data, map, newRoom.position)
                     // Poke a hole and add a gate to the left of the room
-                    map[correctPosRoom.position.y + 2][correctPosRoom.position.x] = MAP_NUM.GATE
+                    map[newRoom.position.y + 2][newRoom.position.x] = MAP_NUM.GATE
 
-                    if (roomFillInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = roomFillInfo.distance + 1
-                        furthestRoom = correctPosRoom
+                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = anchorRoomInfo.distance + 1
+                        furthestRoom = newRoom
                     }
+                    break
                 }
-                break
-            }
-            case dirs[3]: { // DOWN
-                // try to place a few different rooms below the room
-                const insertPos = roomFillInfo.room.position.add(new Vector2(0, roomFillInfo.room.height))
-                insertRoom = new Room(insertRoomInfo, insertPos)
-
-                while (
-                    rooms.some(r => r.isCollided(insertRoom))
-                    || insertRoom.position.x + insertRoom.width >= map[0].length
-                    || insertRoom.position.y + insertRoom.height >= map.length
-                ) {
-                    if (count >= 5) {
-                        skip = true
-                        break
-                    }
-                    insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
-                    insertRoom = new Room(insertRoomInfo, insertPos)
-                    count++
-                }
-
-                // Add room
-                if (!skip) {
-                    const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.DOWN))
-                    rooms.push(correctPosRoom)
+                case Vector2.DOWN: {
+                    rooms.push(newRoom)
                     roomFillArr.push({
-                        room: correctPosRoom,
-                        dirs: ['LEFT', 'RIGHT', 'DOWN'],
-                        distance: roomFillInfo.distance + 1,
+                        room: newRoom,
+                        dirs: [Vector2.LEFT, Vector2.RIGHT, Vector2.DOWN],
+                        distance: anchorRoomInfo.distance + 1,
                     })
-                    insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
+                    insertIntoMatrix(newRoom.data, map, newRoom.position)
                     // Poke a hole and add a gate to the top of the room
-                    map[correctPosRoom.position.y][correctPosRoom.position.x + 2] = MAP_NUM.GATE
+                    map[newRoom.position.y][newRoom.position.x + 2] = MAP_NUM.GATE
 
-                    if (roomFillInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = roomFillInfo.distance + 1
-                        furthestRoom = correctPosRoom
+                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = anchorRoomInfo.distance + 1
+                        furthestRoom = newRoom
                     }
+                    break
                 }
-                break
             }
         }
 
-        // Remove roomFillInfo if all directions filled
-        if (roomFillInfo.dirs.length === 0) roomFillArr.splice(roomFillArr.indexOf(roomFillInfo), 1)
+        // Remove anchorRoomInfo if all directions filled
+        if (anchorRoomInfo.dirs.length === 0) roomFillArr.splice(roomFillArr.indexOf(anchorRoomInfo), 1)
     }
 
     // Add portal
