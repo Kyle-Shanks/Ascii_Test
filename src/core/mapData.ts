@@ -4,6 +4,15 @@ import { EnemyType, ENEMY_TYPE } from 'src/core/enemyData'
 import roomData from 'src/core/roomData'
 import { NumMatrix, Vector2 } from 'src/core/types'
 
+const MAP_SIZE = {
+    XS: 24,
+    S: 32,
+    M: 48,
+    L: 64,
+    XL: 92,
+    XXL: 128,
+} as const
+
 export const MAP_NUM = {
     WALL: 0,
     GATE: 1,
@@ -54,10 +63,10 @@ const insertIntoMatrix = (piece: NumMatrix, matrix: NumMatrix, pos: Vector2 = Ve
     })
 }
 
-const generateMap = (size: number = 40): [MapData, Vector2] => {
+const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
-    const roomFillArr: { room: Room, dirs: string[] }[] = []
+    const roomFillArr: { room: Room, dirs: string[], distance: number }[] = []
     const dirs = ['UP', 'LEFT', 'RIGHT', 'DOWN']
 
     let startRandPos = new Vector2(Math.floor(Math.random() * size), Math.floor(Math.random() * size))
@@ -74,10 +83,13 @@ const generateMap = (size: number = 40): [MapData, Vector2] => {
 
     insertIntoMatrix(startingRoom.data, map, startingRoom.position)
     rooms.push(startingRoom)
-    roomFillArr.push({ room: startingRoom, dirs: dirs.slice() })
+    roomFillArr.push({ room: startingRoom, dirs: dirs.slice(), distance: 0 })
+
+    let furthestRoom = startingRoom
+    let furthestDistance = 0
 
     while (roomFillArr.length) {
-        // Get random room
+        // Get random room info
         const roomFillInfo = roomFillArr[Math.floor(Math.random() * roomFillArr.length)]
         // Get a random direction
         const dir = roomFillInfo.dirs.splice(Math.floor(Math.random() * roomFillInfo.dirs.length), 1)[0]
@@ -113,10 +125,19 @@ const generateMap = (size: number = 40): [MapData, Vector2] => {
                 if (!skip) {
                     const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.UP))
                     rooms.push(correctPosRoom)
-                    roomFillArr.push({ room: correctPosRoom, dirs: ['UP', 'LEFT', 'RIGHT'] })
+                    roomFillArr.push({
+                        room: correctPosRoom,
+                        dirs: ['UP', 'LEFT', 'RIGHT'],
+                        distance: roomFillInfo.distance + 1,
+                    })
                     insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
                     // Poke a hole and add a gate to the right of the room
-                    map[correctPosRoom.position.y + correctPosRoom.height - 1][correctPosRoom.position.x + 2] = 1
+                    map[correctPosRoom.position.y + correctPosRoom.height - 1][correctPosRoom.position.x + 2] = MAP_NUM.GATE
+
+                    if (roomFillInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = roomFillInfo.distance + 1
+                        furthestRoom = correctPosRoom
+                    }
                 }
                 break
             }
@@ -145,10 +166,19 @@ const generateMap = (size: number = 40): [MapData, Vector2] => {
                 if (!skip) {
                     const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.LEFT))
                     rooms.push(correctPosRoom)
-                    roomFillArr.push({ room: correctPosRoom, dirs: ['UP', 'LEFT', 'DOWN'] })
+                    roomFillArr.push({
+                        room: correctPosRoom,
+                        dirs: ['UP', 'LEFT', 'DOWN'],
+                        distance: roomFillInfo.distance + 1,
+                    })
                     insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
                     // Poke a hole and add a gate to the right of the room
-                    map[correctPosRoom.position.y + 2][correctPosRoom.position.x + correctPosRoom.width - 1] = 1
+                    map[correctPosRoom.position.y + 2][correctPosRoom.position.x + correctPosRoom.width - 1] = MAP_NUM.GATE
+
+                    if (roomFillInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = roomFillInfo.distance + 1
+                        furthestRoom = correctPosRoom
+                    }
                 }
                 break
             }
@@ -175,10 +205,19 @@ const generateMap = (size: number = 40): [MapData, Vector2] => {
                 if (!skip) {
                     const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.RIGHT))
                     rooms.push(correctPosRoom)
-                    roomFillArr.push({ room: correctPosRoom, dirs: ['UP', 'RIGHT', 'DOWN'] })
+                    roomFillArr.push({
+                        room: correctPosRoom,
+                        dirs: ['UP', 'RIGHT', 'DOWN'],
+                        distance: roomFillInfo.distance + 1,
+                    })
                     insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
                     // Poke a hole and add a gate to the left of the room
-                    map[correctPosRoom.position.y + 2][correctPosRoom.position.x] = 1
+                    map[correctPosRoom.position.y + 2][correctPosRoom.position.x] = MAP_NUM.GATE
+
+                    if (roomFillInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = roomFillInfo.distance + 1
+                        furthestRoom = correctPosRoom
+                    }
                 }
                 break
             }
@@ -205,10 +244,19 @@ const generateMap = (size: number = 40): [MapData, Vector2] => {
                 if (!skip) {
                     const correctPosRoom = new Room(insertRoomInfo, insertRoom.position.subtract(Vector2.DOWN))
                     rooms.push(correctPosRoom)
-                    roomFillArr.push({ room: correctPosRoom, dirs: ['LEFT', 'RIGHT', 'DOWN'] })
+                    roomFillArr.push({
+                        room: correctPosRoom,
+                        dirs: ['LEFT', 'RIGHT', 'DOWN'],
+                        distance: roomFillInfo.distance + 1,
+                    })
                     insertIntoMatrix(correctPosRoom.data, map, correctPosRoom.position)
                     // Poke a hole and add a gate to the top of the room
-                    map[correctPosRoom.position.y][correctPosRoom.position.x + 2] = 1
+                    map[correctPosRoom.position.y][correctPosRoom.position.x + 2] = MAP_NUM.GATE
+
+                    if (roomFillInfo.distance + 1 > furthestDistance) {
+                        furthestDistance = roomFillInfo.distance + 1
+                        furthestRoom = correctPosRoom
+                    }
                 }
                 break
             }
@@ -218,19 +266,13 @@ const generateMap = (size: number = 40): [MapData, Vector2] => {
         if (roomFillInfo.dirs.length === 0) roomFillArr.splice(roomFillArr.indexOf(roomFillInfo), 1)
     }
 
+    // Add portal
+    map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
+
     return [map, startingRoom.spawnPoint]
 }
 
-const MAP_SIZE = {
-    XS: 24,
-    S: 32,
-    M: 48,
-    L: 64,
-    XL: 92,
-    XXL: 128,
-}
-
-const [getMapData, genStartPos] = generateMap(MAP_SIZE.S)
+const [getMapData, genStartPos] = generateMap()
 
 const mapData: MapInfo[] = [
     {
