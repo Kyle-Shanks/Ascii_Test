@@ -195,7 +195,7 @@ const draw = () => {
     })
     PLAYER.draw()
     drawLight(lightMap)
-    // drawUI()
+    drawUI()
 }
 
 // Watch Input

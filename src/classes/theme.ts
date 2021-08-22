@@ -1,6 +1,13 @@
 const THEME = {
-    LIGHT: 'Light',
     DARK: 'Dark',
+    MIDNIGHT: 'Midnight',
+    AFTERGLOW: 'Afterglow',
+    MUTED: 'Muted',
+    ZEN: 'Zen',
+    SEAFOAM: 'Seafoam',
+    NORD: 'Nord',
+    ROCK: 'Rock',
+    CMYK: 'CMYK',
 } as const
 
 type Theme = typeof THEME[keyof typeof THEME]
@@ -22,20 +29,76 @@ class ThemeManager {
     public currentTheme: Theme
 
     private themeMap: Record<Theme, ThemeColors> = {
+        [THEME.CMYK]: {
+            background: '#000000',
+            low: '#333333',
+            high: '#dddddd',
+            accent: '#ffff00',
+            pop: '#00ffff',
+            danger: '#ff00ff',
+        },
+        [THEME.ROCK]: {
+            background: '#232323',
+            low: '#484848',
+            high: '#d7c8bb',
+            accent: '#a99174',
+            pop: '#8c8c8c',
+            danger: '#a95552',
+        },
+        [THEME.NORD]: {
+            background: '#2f3541',
+            low: '#3b4353',
+            high: '#e5e9ef',
+            accent: '#ebcb8b',
+            pop: '#88bfd0',
+            danger: '#bf616a',
+        },
+        [THEME.SEAFOAM]: {
+            background: '#243536',
+            low: '#546566',
+            high: '#e0e0e0',
+            accent: '#fae79d',
+            pop: '#7ac3cf',
+            danger: '#cf937a',
+        },
+        [THEME.ZEN]: {
+            background: '#404040',
+            low: '#4e4e4e',
+            high: '#dcdccb',
+            accent: '#e0cf9e',
+            pop: '#6f9080',
+            danger: '#dc8cc3',
+        },
+        [THEME.MUTED]: {
+            background: '#343434',
+            low: '#5a5a5a',
+            high: '#cccccc',
+            accent: '#ffb380',
+            pop: '#86deaa',
+            danger: '#ff8080',
+        },
+        [THEME.AFTERGLOW]: {
+            background: '#232323',
+            low: '#414141',
+            high: '#d0d0d0',
+            accent: '#d3a04e',
+            pop: '#7a9147',
+            danger: '#9f4e84',
+        },
+        [THEME.MIDNIGHT]: {
+            background: '#0F0F14',
+            low: '#31333E',
+            high: '#8CB5B9',
+            accent: '#CEC675',
+            pop: '#5EB17E',
+            danger: '#D57EC0',
+        },
         [THEME.DARK]: {
             background: '#2a303c',
             low: '#464e5f',
             high: '#e2e8f0',
             accent: '#eec323',
             pop: '#4cc2c1',
-            danger: '#ff6347',
-        },
-        [THEME.LIGHT]: {
-            background: '#ffffff',
-            low: '#cbd5e0',
-            high: '#2d3748',
-            accent: '#4ca2a1',
-            pop: '#ef9433',
             danger: '#ff6347',
         },
     }

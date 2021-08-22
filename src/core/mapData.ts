@@ -124,7 +124,7 @@ const getRoomToInsert = (
     return !skip ? new Room(insertRoomInfo, insertRoom.position.subtract(dir)) : null
 }
 
-const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
+export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
     const roomFillArr: { room: Room, dirs: Vector2[], distance: number }[] = []
@@ -246,18 +246,29 @@ const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
     map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
 
     console.log({ map, rooms })
-    return [map, startingRoom.spawnPoint]
+    return {
+        title: `${Date.now()}`,
+        startPosition: startingRoom.spawnPoint,
+        enemies: [],
+        data: map,
+    }
 }
 
-const [getMapData, genStartPos] = generateMap()
-
 const mapData: MapInfo[] = [
-    {
-        title: 'Gen Level',
-        startPosition: genStartPos,
-        enemies: [],
-        data: getMapData,
-    },
+    generateMap(MAP_SIZE.XS),
+    generateMap(MAP_SIZE.XS),
+    generateMap(MAP_SIZE.S),
+    generateMap(MAP_SIZE.S),
+    generateMap(MAP_SIZE.M),
+    generateMap(MAP_SIZE.M),
+    generateMap(MAP_SIZE.L),
+    generateMap(MAP_SIZE.L),
+    generateMap(MAP_SIZE.XL),
+    generateMap(MAP_SIZE.XL),
+    generateMap(MAP_SIZE.XXL),
+    generateMap(MAP_SIZE.XXL),
+
+    // Test Levels
     {
         title: 'Test Level',
         startPosition: new Vector2(3, 3),
