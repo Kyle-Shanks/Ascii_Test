@@ -110,7 +110,7 @@ class Player extends Actor {
             if (entity !== null) {
                 switch (entity.type) {
                     case ENTITY_TYPES.WALL:
-                        this.logManager.addLog({ msg: 'What a nice wall.' })
+                        // this.logManager.addLog({ msg: 'What a nice wall.' })
                         break
                     case ENTITY_TYPES.GATE:
                         map.openDoor(entity)

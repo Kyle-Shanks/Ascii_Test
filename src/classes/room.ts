@@ -28,6 +28,15 @@ class Room {
         && this.position.y < room.position.y + room.height
         && this.position.y + this.height > room.position.y
     )
+
+    // AABB style collision detection
+    // Padding of 1 in all directions to account for the room border
+    isOverlapping = (room: Room) => (
+        this.position.x < room.position.x + room.width - 1
+        && this.position.x + this.width > room.position.x + 1
+        && this.position.y < room.position.y + room.height - 1
+        && this.position.y + this.height > room.position.y + 1
+    )
 }
 
 export default Room

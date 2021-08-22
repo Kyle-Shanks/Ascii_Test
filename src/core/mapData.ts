@@ -104,7 +104,8 @@ const getRoomToInsert = (
 
     // Check the bounds of the room and make sure its not colliding with other rooms
     while (
-        rooms.some(r => r.isCollided(insertRoom))
+        // rooms.some(r => r.isCollided(insertRoom))
+        rooms.some(r => r.isOverlapping(insertRoom))
         || insertRoom.position.x < 0
         || insertRoom.position.y < 0
         || insertRoom.position.x + insertRoom.width >= map[0].length
@@ -174,7 +175,7 @@ const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
                         distance: anchorRoomInfo.distance + 1,
                     })
                     insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the right of the room
+                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y + newRoom.height - 1][newRoom.position.x + 2] = MAP_NUM.GATE
 
                     if (anchorRoomInfo.distance + 1 > furthestDistance) {
@@ -191,7 +192,7 @@ const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
                         distance: anchorRoomInfo.distance + 1,
                     })
                     insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the right of the room
+                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y + 2][newRoom.position.x + newRoom.width - 1] = MAP_NUM.GATE
 
                     if (anchorRoomInfo.distance + 1 > furthestDistance) {
@@ -208,7 +209,7 @@ const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
                         distance: anchorRoomInfo.distance + 1,
                     })
                     insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the left of the room
+                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y + 2][newRoom.position.x] = MAP_NUM.GATE
 
                     if (anchorRoomInfo.distance + 1 > furthestDistance) {
@@ -225,7 +226,7 @@ const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
                         distance: anchorRoomInfo.distance + 1,
                     })
                     insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the top of the room
+                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y][newRoom.position.x + 2] = MAP_NUM.GATE
 
                     if (anchorRoomInfo.distance + 1 > furthestDistance) {
@@ -244,6 +245,7 @@ const generateMap = (size: number = MAP_SIZE.S): [MapData, Vector2] => {
     // Add portal
     map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
 
+    console.log({ map, rooms })
     return [map, startingRoom.spawnPoint]
 }
 
