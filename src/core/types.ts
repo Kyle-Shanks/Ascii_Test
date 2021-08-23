@@ -11,6 +11,13 @@ export type Stats = {
 
 // Vector2
 export class Vector2 {
+    static readonly ZERO = new Vector2(0, 0)
+    static readonly UP = new Vector2(0, -1)
+    static readonly DOWN = new Vector2(0, 1)
+    static readonly LEFT = new Vector2(-1, 0)
+    static readonly RIGHT = new Vector2(1, 0)
+    static readonly DIRS = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+
     readonly x: number
     readonly y: number
 
@@ -19,19 +26,11 @@ export class Vector2 {
         this.y = y
     }
 
-    static ZERO = new Vector2(0, 0)
-    static UP = new Vector2(0, -1)
-    static DOWN = new Vector2(0, 1)
-    static LEFT = new Vector2(-1, 0)
-    static RIGHT = new Vector2(1, 0)
-
     toString = (): string => `${this.x},${this.y}`
     length = (): number => this.distanceTo(Vector2.ZERO)
     normalize = (): Vector2 => this.divide(this.length())
 
-    getAdjacent = (): Vector2[] => (
-        [Vector2.UP, Vector2.LEFT, Vector2.DOWN, Vector2.RIGHT].map((dir) => dir.add(this))
-    )
+    getAdjacent = (): Vector2[] => Vector2.DIRS.map((dir) => dir.add(this))
 
     isEqual = (vec: Vector2): boolean => (
         this.x === vec.x && this.y === vec.y

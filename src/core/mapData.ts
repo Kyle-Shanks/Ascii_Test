@@ -75,26 +75,23 @@ const getRoomToInsert = (
     let insertRoom = new Room(insertRoomInfo, Vector2.ZERO)
 
     const getInsertPos = (dir: Vector2, roomInfo: RoomInfo): Vector2 => {
-        switch (dir) {
-            case Vector2.UP:
-            case Vector2.LEFT:
-                return anchorRoomInfo.room.position.add(
-                    new Vector2(
-                        dir.x * roomInfo.data[0].length,
-                        dir.y * roomInfo.data.length
-                    )
+        if (dir.isEqual(Vector2.UP) || dir.isEqual(Vector2.LEFT)) {
+            return anchorRoomInfo.room.position.add(
+                new Vector2(
+                    dir.x * roomInfo.data[0].length,
+                    dir.y * roomInfo.data.length
                 )
-            case Vector2.RIGHT:
-            case Vector2.DOWN:
-                return anchorRoomInfo.room.position.add(
-                    new Vector2(
-                        dir.x * anchorRoomInfo.room.width,
-                        dir.y * anchorRoomInfo.room.height
-                    )
+            )
+        } else if (dir.isEqual(Vector2.RIGHT) || dir.isEqual(Vector2.DOWN)) {
+            return anchorRoomInfo.room.position.add(
+                new Vector2(
+                    dir.x * anchorRoomInfo.room.width,
+                    dir.y * anchorRoomInfo.room.height
                 )
-            default:
-                console.error('Invalid direction in getInsertPos')
-                return Vector2.ZERO
+            )
+        } else {
+            console.error('Invalid direction in getInsertPos')
+            return Vector2.ZERO
         }
     }
 
@@ -127,6 +124,7 @@ const getRoomToInsert = (
 export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
+    // Array of room information where more rooms need to be attached
     const roomFillArr: { room: Room, dirs: Vector2[], distance: number }[] = []
 
     // Create starting room
@@ -148,7 +146,7 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
     rooms.push(startingRoom)
     roomFillArr.push({
         room: startingRoom,
-        dirs: [Vector2.UP, Vector2.LEFT, Vector2.RIGHT, Vector2.DOWN],
+        dirs: [...Vector2.DIRS],
         distance: 0,
     })
 
@@ -166,73 +164,37 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
 
         // Add new room
         if (newRoom) {
+            const newRoomDistance = anchorRoomInfo.distance + 1
+            rooms.push(newRoom)
+            insertIntoMatrix(newRoom.data, map, newRoom.position)
+            roomFillArr.push({
+                room: newRoom,
+                // Remove opposite direction bc thats the direction of the room we attached to
+                dirs: Vector2.DIRS.filter(d => !dir.isEqual(d.multiply(-1))),
+                distance: newRoomDistance,
+            })
+
+            if (newRoomDistance > furthestDistance) {
+                furthestDistance = newRoomDistance
+                furthestRoom = newRoom
+            }
+
+            // Add the gate for the new room
             switch (dir) {
                 case Vector2.UP: {
-                    rooms.push(newRoom)
-                    roomFillArr.push({
-                        room: newRoom,
-                        dirs: [Vector2.UP, Vector2.LEFT, Vector2.RIGHT],
-                        distance: anchorRoomInfo.distance + 1,
-                    })
-                    insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y + newRoom.height - 1][newRoom.position.x + 2] = MAP_NUM.GATE
-
-                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = anchorRoomInfo.distance + 1
-                        furthestRoom = newRoom
-                    }
                     break
                 }
                 case Vector2.LEFT: {
-                    rooms.push(newRoom)
-                    roomFillArr.push({
-                        room: newRoom,
-                        dirs: [Vector2.UP, Vector2.LEFT, Vector2.DOWN],
-                        distance: anchorRoomInfo.distance + 1,
-                    })
-                    insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y + 2][newRoom.position.x + newRoom.width - 1] = MAP_NUM.GATE
-
-                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = anchorRoomInfo.distance + 1
-                        furthestRoom = newRoom
-                    }
                     break
                 }
                 case Vector2.RIGHT: {
-                    rooms.push(newRoom)
-                    roomFillArr.push({
-                        room: newRoom,
-                        dirs: [Vector2.UP, Vector2.RIGHT, Vector2.DOWN],
-                        distance: anchorRoomInfo.distance + 1,
-                    })
-                    insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y + 2][newRoom.position.x] = MAP_NUM.GATE
-
-                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = anchorRoomInfo.distance + 1
-                        furthestRoom = newRoom
-                    }
                     break
                 }
                 case Vector2.DOWN: {
-                    rooms.push(newRoom)
-                    roomFillArr.push({
-                        room: newRoom,
-                        dirs: [Vector2.LEFT, Vector2.RIGHT, Vector2.DOWN],
-                        distance: anchorRoomInfo.distance + 1,
-                    })
-                    insertIntoMatrix(newRoom.data, map, newRoom.position)
-                    // Poke a hole and add a gate to the new room
                     map[newRoom.position.y][newRoom.position.x + 2] = MAP_NUM.GATE
-
-                    if (anchorRoomInfo.distance + 1 > furthestDistance) {
-                        furthestDistance = anchorRoomInfo.distance + 1
-                        furthestRoom = newRoom
-                    }
                     break
                 }
             }

@@ -8,6 +8,7 @@ const THEME = {
     NORD: 'Nord',
     ROCK: 'Rock',
     CMYK: 'CMYK',
+    BLUE: 'Blue',
 } as const
 
 type Theme = typeof THEME[keyof typeof THEME]
@@ -29,6 +30,14 @@ class ThemeManager {
     public currentTheme: Theme
 
     private themeMap: Record<Theme, ThemeColors> = {
+        [THEME.BLUE]: {
+            background: '#1c2b35',
+            low: '#2a5055',
+            high: '#6fc3c3',
+            accent: '#fac863',
+            pop: '#fac863',
+            danger: '#fa6863',
+        },
         [THEME.CMYK]: {
             background: '#000000',
             low: '#333333',
