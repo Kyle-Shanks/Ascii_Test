@@ -65,7 +65,7 @@ const insertIntoMatrix = (piece: NumMatrix, matrix: NumMatrix, pos: Vector2 = Ve
 
 const getRoomToInsert = (
     dir: Vector2,
-    anchorRoomInfo: { room: Room, dirs: Vector2[], distance: number },
+    anchorRoomInfo: { room: Room, dirs: Vector2[] },
     rooms: Room[],
     map: MapData,
 ): Room | null => {
@@ -124,8 +124,9 @@ const getRoomToInsert = (
 export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
+    const roomDistanceMap: Record<string, number> = {}
     // Array of room information where more rooms need to be attached
-    const roomFillArr: { room: Room, dirs: Vector2[], distance: number }[] = []
+    const roomFillArr: { room: Room, dirs: Vector2[] }[] = []
 
     // Create starting room
     let startRandPos = new Vector2(Math.floor(Math.random() * size), Math.floor(Math.random() * size))
@@ -144,10 +145,10 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
     // Add the starting room data to the map
     insertIntoMatrix(startingRoom.data, map, startingRoom.position)
     rooms.push(startingRoom)
+    roomDistanceMap[startingRoom.id] = 0
     roomFillArr.push({
         room: startingRoom,
         dirs: [...Vector2.DIRS],
-        distance: 0,
     })
 
     // Keep track of the furthest room from the starting room
@@ -164,14 +165,14 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
 
         // Add new room
         if (newRoom) {
-            const newRoomDistance = anchorRoomInfo.distance + 1
+            const newRoomDistance = roomDistanceMap[anchorRoomInfo.room.id] + 1
             rooms.push(newRoom)
             insertIntoMatrix(newRoom.data, map, newRoom.position)
+            roomDistanceMap[newRoom.id] = newRoomDistance
             roomFillArr.push({
                 room: newRoom,
                 // Remove opposite direction bc thats the direction of the room we attached to
                 dirs: Vector2.DIRS.filter(d => !dir.isEqual(d.multiply(-1))),
-                distance: newRoomDistance,
             })
 
             if (newRoomDistance > furthestDistance) {
@@ -207,7 +208,7 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
     // Add portal
     map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
 
-    console.log({ map, rooms })
+    console.log({ map, rooms, roomDistanceMap })
     return {
         title: `${Date.now()}`,
         startPosition: startingRoom.spawnPoint,

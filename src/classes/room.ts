@@ -2,15 +2,18 @@ import { RoomData, RoomInfo, RoomType } from 'src/core/roomData'
 import { Vector2 } from 'src/core/types'
 
 class Room {
-    height: number
-    width: number
-    type: RoomType
-    data: RoomData
-    position: Vector2
-    spawnPoint: Vector2
-    enemySpawnPoints: Vector2[]
+    readonly id: string
+    readonly height: number
+    readonly width: number
+    readonly type: RoomType
+    readonly data: RoomData
+    readonly position: Vector2
+    readonly spawnPoint: Vector2
+    readonly enemySpawnPoints: Vector2[]
 
     constructor(info: RoomInfo, pos: Vector2) {
+        // Random id for room
+        this.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
         this.data = info.data
         this.height = info.data.length
         this.width = info.data[0].length
