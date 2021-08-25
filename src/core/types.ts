@@ -16,7 +16,7 @@ export class Vector2 {
     static readonly DOWN = new Vector2(0, 1)
     static readonly LEFT = new Vector2(-1, 0)
     static readonly RIGHT = new Vector2(1, 0)
-    static readonly DIRS = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+    static readonly DIRS = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT] as const
 
     readonly x: number
     readonly y: number

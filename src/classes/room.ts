@@ -1,12 +1,12 @@
-import { RoomData, RoomInfo, RoomType } from 'src/core/roomData'
-import { Vector2 } from 'src/core/types'
+import { RoomInfo, RoomType } from 'src/core/roomData'
+import { NumMatrix, Vector2 } from 'src/core/types'
 
 class Room {
     readonly id: string
     readonly height: number
     readonly width: number
     readonly type: RoomType
-    readonly data: RoomData
+    readonly data: NumMatrix
     readonly position: Vector2
     readonly spawnPoint: Vector2
     readonly enemySpawnPoints: Vector2[]

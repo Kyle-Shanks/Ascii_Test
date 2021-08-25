@@ -1,4 +1,4 @@
-import { Vector2 } from 'src/core/types'
+import { NumMatrix, Vector2 } from 'src/core/types'
 
 // To make the map data visually easier to read
 const _ = null
@@ -13,13 +13,11 @@ export const ROOM_TYPE = {
 
 export type RoomType = typeof ROOM_TYPE[keyof typeof ROOM_TYPE]
 
-export type RoomData = (number | null)[][]
-
 export type RoomInfo = {
     type: RoomType
     spawnPoint: Vector2
     enemySpawnPoints: Vector2[]
-    data: RoomData
+    data: NumMatrix
 }
 
 // const roomData: Record<RoomType, RoomInfo[]> = {

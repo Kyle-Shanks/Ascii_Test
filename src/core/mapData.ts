@@ -1,8 +1,9 @@
 import Room from 'src/classes/room'
 import { ENTITY_TYPES, EntityType } from 'src/core/constants'
 import { EnemyType, ENEMY_TYPE } from 'src/core/enemyData'
-import roomData, { RoomInfo } from 'src/core/roomData'
+import roomData, { RoomInfo, ROOM_TYPE } from 'src/core/roomData'
 import { NumMatrix, Vector2 } from 'src/core/types'
+import { rand } from 'src/core/util'
 
 // To make the map data visually easier to read
 const _ = null
@@ -15,6 +16,8 @@ const MAP_SIZE = {
     XL: 92,
     XXL: 128,
 } as const
+
+type MapSize = typeof MAP_SIZE[keyof typeof MAP_SIZE]
 
 export const MAP_NUM = {
     WALL: 0,
@@ -51,6 +54,18 @@ export type MapInfo = {
     title: string
 }
 
+const getRoomDataFromMapSize = (mapSize: MapSize): RoomInfo[] => {
+    if (mapSize === MAP_SIZE.XS || mapSize === MAP_SIZE.S) {
+        return roomData.filter((data) => (
+            data.type !== ROOM_TYPE.LARGE && data.type !== ROOM_TYPE.JUMBO
+        ))
+    } else if (mapSize === MAP_SIZE.M) {
+        return roomData.filter((data) => data.type !== ROOM_TYPE.JUMBO)
+    } else {
+        return roomData
+    }
+}
+
 const insertIntoMatrix = (piece: NumMatrix, matrix: NumMatrix, pos: Vector2 = Vector2.ZERO) => {
     piece.forEach((row, y) => {
         const yPos = y + pos.y
@@ -67,11 +82,12 @@ const getRoomToInsert = (
     dir: Vector2,
     anchorRoomInfo: { room: Room, dirs: Vector2[] },
     rooms: Room[],
-    map: MapData,
+    mapSize: MapSize,
 ): Room | null => {
     let count = 0
     let skip = false
-    let insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
+    let filteredRoomData = getRoomDataFromMapSize(mapSize)
+    let insertRoomInfo = filteredRoomData[rand(filteredRoomData.length)]
     let insertRoom = new Room(insertRoomInfo, Vector2.ZERO)
 
     const getInsertPos = (dir: Vector2, roomInfo: RoomInfo): Vector2 => {
@@ -105,14 +121,14 @@ const getRoomToInsert = (
         rooms.some(r => r.isOverlapping(insertRoom))
         || insertRoom.position.x < 0
         || insertRoom.position.y < 0
-        || insertRoom.position.x + insertRoom.width >= map[0].length
-        || insertRoom.position.y + insertRoom.height >= map.length
+        || insertRoom.position.x + insertRoom.width >= mapSize
+        || insertRoom.position.y + insertRoom.height >= mapSize
     ) {
         if (count >= 5) {
             skip = true
             break
         }
-        insertRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
+        insertRoomInfo = filteredRoomData[rand(filteredRoomData.length)]
         insertPos = getInsertPos(dir, insertRoomInfo)
         insertRoom = new Room(insertRoomInfo, insertPos)
         count++
@@ -121,7 +137,7 @@ const getRoomToInsert = (
     return !skip ? new Room(insertRoomInfo, insertRoom.position.subtract(dir)) : null
 }
 
-export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
+export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
     const roomDistanceMap: Record<string, number> = {}
@@ -129,16 +145,17 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
     const roomFillArr: { room: Room, dirs: Vector2[] }[] = []
 
     // Create starting room
-    let startRandPos = new Vector2(Math.floor(Math.random() * size), Math.floor(Math.random() * size))
-    let startRoomInfo = roomData[Math.floor(Math.random() * roomData.length)]
+    let startRandPos = new Vector2(rand(size), rand(size))
+    let filteredRoomData = getRoomDataFromMapSize(size)
+    let startRoomInfo = filteredRoomData[rand(filteredRoomData.length)]
     let startingRoom = new Room(startRoomInfo, startRandPos)
 
     // Make sure the starting room fits in the map
     while (
-        startingRoom.position.x + startingRoom.width >= map[0].length
-        || startingRoom.position.y + startingRoom.height >= map.length
+        startingRoom.position.x + startingRoom.width >= size
+        || startingRoom.position.y + startingRoom.height >= size
     ) {
-        startRandPos = new Vector2(Math.floor(Math.random() * size), Math.floor(Math.random() * size))
+        startRandPos = new Vector2(rand(size), rand(size))
         startingRoom = new Room(startRoomInfo, startRandPos)
     }
 
@@ -157,11 +174,11 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
 
     while (roomFillArr.length) {
         // Get random room info to insert new room around
-        const anchorRoomInfo = roomFillArr[Math.floor(Math.random() * roomFillArr.length)]
+        const anchorRoomInfo = roomFillArr[rand(roomFillArr.length)]
         // Get a random direction around room
-        const dir = anchorRoomInfo.dirs.splice(Math.floor(Math.random() * anchorRoomInfo.dirs.length), 1)[0]
+        const dir = anchorRoomInfo.dirs.splice(rand(anchorRoomInfo.dirs.length), 1)[0]
         // Get new room to insert
-        const newRoom = getRoomToInsert(dir, anchorRoomInfo, rooms, map)
+        const newRoom = getRoomToInsert(dir, anchorRoomInfo, rooms, size)
 
         // Add new room
         if (newRoom) {
@@ -181,23 +198,14 @@ export const generateMap = (size: number = MAP_SIZE.S): MapInfo => {
             }
 
             // Add the gate for the new room
-            switch (dir) {
-                case Vector2.UP: {
-                    map[newRoom.position.y + newRoom.height - 1][newRoom.position.x + 2] = MAP_NUM.GATE
-                    break
-                }
-                case Vector2.LEFT: {
-                    map[newRoom.position.y + 2][newRoom.position.x + newRoom.width - 1] = MAP_NUM.GATE
-                    break
-                }
-                case Vector2.RIGHT: {
-                    map[newRoom.position.y + 2][newRoom.position.x] = MAP_NUM.GATE
-                    break
-                }
-                case Vector2.DOWN: {
-                    map[newRoom.position.y][newRoom.position.x + 2] = MAP_NUM.GATE
-                    break
-                }
+            if (dir.isEqual(Vector2.UP)) {
+                map[newRoom.position.y + newRoom.height - 1][newRoom.position.x + 2] = MAP_NUM.GATE
+            } else if (dir.isEqual(Vector2.LEFT)) {
+                map[newRoom.position.y + 2][newRoom.position.x + newRoom.width - 1] = MAP_NUM.GATE
+            } else if (dir.isEqual(Vector2.RIGHT)) {
+                map[newRoom.position.y + 2][newRoom.position.x] = MAP_NUM.GATE
+            } else if (dir.isEqual(Vector2.DOWN)) {
+                map[newRoom.position.y][newRoom.position.x + 2] = MAP_NUM.GATE
             }
         }
 
