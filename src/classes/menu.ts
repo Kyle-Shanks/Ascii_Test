@@ -1,6 +1,6 @@
 import { CNV, CTX } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
-import { InputEvent, InputKey } from 'src/classes/input'
+import { InputEvent } from 'src/classes/input'
 import ThemeManager, { THEME } from 'src/classes/theme'
 import EffectManager, { EFFECT } from './effectManager'
 
@@ -9,7 +9,13 @@ type MenuProps = {
     themeManager: ThemeManager
 }
 
-type ActionMap = Record<InputKey, Function>
+type MenuOption = {
+    title: string
+    getValue: Function
+    next: Function
+    prev: Function
+    select: Function
+}
 
 const themeArr = Object.values(THEME)
 const effectArr = Object.values(EFFECT)
@@ -18,40 +24,57 @@ class Menu {
     readonly height: number
     readonly width: number
     readonly borderSize: number
+    readonly optionSpacing: number
     readonly position: Vector2
 
     private effectManager: EffectManager
     private themeManager: ThemeManager
 
-    private cursorPosition: number
-    private _pressActionMap: ActionMap
+    private cursorIndex: number
+    private options: MenuOption[]
 
     constructor(props: MenuProps) {
         this.themeManager = props.themeManager
         this.effectManager = props.effectManager
-        this.height = 400
-        this.width = 340
+
+        this.cursorIndex = 0
+        this.options = [
+            {
+                title: 'Theme',
+                getValue: this.themeManager.getTheme,
+                next: this.nextTheme,
+                prev: this.prevTheme,
+                select: this.nextTheme
+            },
+            {
+                title: 'FX',
+                getValue: this.effectManager.getEffect,
+                next: this.nextEffect,
+                prev: this.prevEffect,
+                select: this.nextEffect
+            },
+        ]
+
         this.borderSize = 10
+        this.optionSpacing = 100
+        this.height = 20 + (this.borderSize * 2) + (this.options.length * this.optionSpacing)
+        this.width = 300 + (this.borderSize * 2)
         this.position = new Vector2(
             (CNV.width - this.width) / 2,
             (CNV.height - this.height) / 2
         )
-
-        this.cursorPosition = 0
-        this._pressActionMap = {
-            'W': this.cursorUp,
-            'A': this.prev,
-            'S': this.cursorDown,
-            'D': this.next,
-            'Shift': () => {},
-            'Space': () => {},
-            'J': () => {},
-            'K': () => {},
-        }
     }
 
     handleInput = (event: InputEvent) => {
-        if (event.type === 'press') this._pressActionMap[event.key]()
+        if (event.type === 'press') {
+            switch (event.key) {
+                case 'W': return this.cursorUp()
+                case 'A': return this.options[this.cursorIndex].prev()
+                case 'S': return this.cursorDown()
+                case 'D': return this.options[this.cursorIndex].next()
+                case 'J': return this.options[this.cursorIndex].select()
+            }
+        }
     }
 
     draw = () => {
@@ -72,49 +95,38 @@ class Menu {
         CTX.textAlign = 'left'
         CTX.textBaseline = 'middle'
 
-        // Theme
-        CTX.fillStyle = this.themeManager.getColors().accent
-        CTX.fillText('Theme', this.position.x + 55, this.position.y + 50)
-        CTX.fillStyle = this.themeManager.getColors().high
-        CTX.fillText(this.themeManager.getTheme(), this.position.x + 85, this.position.y + 90)
+        // Draw options
+        this.options.forEach((option, idx) => {
+            // Title
+            CTX.fillStyle = this.themeManager.getColors().accent
+            CTX.fillText(
+                option.title,
+                this.position.x + this.borderSize + 45,
+                this.position.y + this.borderSize + 40 + (idx * this.optionSpacing)
+            )
+            // Value
+            CTX.fillStyle = this.themeManager.getColors().high
+            CTX.fillText(
+                option.getValue(),
+                this.position.x + this.borderSize + 85,
+                this.position.y + this.borderSize + 80 + (idx * this.optionSpacing)
+            )
+        })
 
-        // FX
-        CTX.fillStyle = this.themeManager.getColors().accent
-        CTX.fillText('FX', this.position.x + 55, this.position.y + 150)
-        CTX.fillStyle = this.themeManager.getColors().high
-        CTX.fillText(this.effectManager.getEffect(), this.position.x + 85, this.position.y + 190)
-
-        // Cursor
+        // Draw cursor
         CTX.fillRect(
-            this.position.x + 32,
-            this.position.y + (this.cursorPosition * 100) + 41,
+            this.position.x + this.borderSize + 22,
+            this.position.y + this.borderSize + 31 + (this.cursorIndex * this.optionSpacing),
             12.5,
             12.5
         )
     }
 
     private cursorUp = () => {
-        if (this.cursorPosition > 0) this.cursorPosition--
+        if (this.cursorIndex > 0) this.cursorIndex--
     }
     private cursorDown = () => {
-        if (this.cursorPosition < 1) this.cursorPosition++
-    }
-
-    private next = () => {
-        switch (this.cursorPosition) {
-            case 0: return this.nextTheme()
-            case 1: return this.nextEffect()
-            case 2: break
-            case 3: break
-        }
-    }
-    private prev = () => {
-        switch (this.cursorPosition) {
-            case 0: return this.prevTheme()
-            case 1: return this.prevEffect()
-            case 2: break
-            case 3: break
-        }
+        if (this.cursorIndex < this.options.length - 1) this.cursorIndex++
     }
 
     private nextTheme = () => {

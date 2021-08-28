@@ -37,7 +37,7 @@ class EffectManager {
         this.clearEffect()
 
         const lineWidth = 3
-        FX_CTX.fillStyle = `rgba(0,0,0,0.12)`
+        FX_CTX.fillStyle = `rgba(0,0,0,0.11)`
 
         // Lines
         for (let i = 0; i < FX_CNV.height; i += lineWidth * 2) {
