@@ -209,6 +209,7 @@ class InputWatcher implements InputObserver {
         // Toggle menu
         if (event.type === 'press' && event.key === 'Space') {
             isMenuOpen = !isMenuOpen
+            draw()
             return
         }
 

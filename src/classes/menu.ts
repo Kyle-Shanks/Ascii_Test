@@ -25,6 +25,7 @@ class Menu {
     readonly width: number
     readonly borderSize: number
     readonly optionSpacing: number
+    readonly headerSpacing: number
     readonly position: Vector2
 
     private effectManager: EffectManager
@@ -57,7 +58,8 @@ class Menu {
 
         this.borderSize = 10
         this.optionSpacing = 100
-        this.height = 20 + (this.borderSize * 2) + (this.options.length * this.optionSpacing)
+        this.headerSpacing = 70
+        this.height = 20 + (this.borderSize * 2) + this.headerSpacing + (this.options.length * this.optionSpacing)
         this.width = 300 + (this.borderSize * 2)
         this.position = new Vector2(
             (CNV.width - this.width) / 2,
@@ -91,32 +93,42 @@ class Menu {
             this.height - this.borderSize * 2,
         )
 
+        // Draw Header
         CTX.font = `28px Andale Mono`
-        CTX.textAlign = 'left'
+        CTX.textAlign = 'center'
         CTX.textBaseline = 'middle'
 
+        CTX.fillStyle = this.themeManager.getColors().accent
+        CTX.fillText(
+            '- Settings -',
+            this.position.x + this.width / 2,
+            this.position.y + this.borderSize + this.headerSpacing / 2
+        )
+
         // Draw options
+        CTX.textAlign = 'left'
+
         this.options.forEach((option, idx) => {
             // Title
             CTX.fillStyle = this.themeManager.getColors().accent
             CTX.fillText(
                 option.title,
                 this.position.x + this.borderSize + 45,
-                this.position.y + this.borderSize + 40 + (idx * this.optionSpacing)
+                this.position.y + this.borderSize + this.headerSpacing + 20 + (idx * this.optionSpacing)
             )
             // Value
             CTX.fillStyle = this.themeManager.getColors().high
             CTX.fillText(
                 option.getValue(),
                 this.position.x + this.borderSize + 85,
-                this.position.y + this.borderSize + 80 + (idx * this.optionSpacing)
+                this.position.y + this.borderSize + this.headerSpacing + 60 + (idx * this.optionSpacing)
             )
         })
 
         // Draw cursor
         CTX.fillRect(
             this.position.x + this.borderSize + 22,
-            this.position.y + this.borderSize + 31 + (this.cursorIndex * this.optionSpacing),
+            this.position.y + this.borderSize + this.headerSpacing + 11 + (this.cursorIndex * this.optionSpacing),
             12.5,
             12.5
         )
