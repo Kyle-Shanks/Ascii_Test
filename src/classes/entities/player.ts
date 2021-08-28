@@ -56,8 +56,11 @@ class Player extends Actor {
     }
 
     handleInput = (event: InputEvent, map: Map, enemies: Enemy[]) => {
-        if (event.type === 'press') this._pressActionMap[event.key](map, enemies)
-        else if (event.type === 'release') this._releaseActionMap[event.key](map, enemies)
+        if (event.type === 'press') {
+            this._pressActionMap[event.key](map, enemies)
+        } else if (event.type === 'release') {
+            this._releaseActionMap[event.key](map, enemies)
+        }
     }
 
     private _walk = (dir: Vector2, map: Map, enemies: Enemy[]) => {

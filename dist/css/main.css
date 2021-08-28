@@ -18,7 +18,8 @@ body {
     border-radius: 0.25rem;
 }
 
-#cnv {
+#cnv, #fxCnv {
+    position: absolute;
     height: 100%;
     width: 100%;
 }

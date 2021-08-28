@@ -1,4 +1,4 @@
-const THEME = {
+export const THEME = {
     DARK: 'Dark',
     MIDNIGHT: 'Midnight',
     AFTERGLOW: 'Afterglow',
@@ -9,6 +9,7 @@ const THEME = {
     ROCK: 'Rock',
     CMYK: 'CMYK',
     BLUE: 'Blue',
+    COQ: 'CoQ',
 } as const
 
 type Theme = typeof THEME[keyof typeof THEME]
@@ -30,6 +31,14 @@ class ThemeManager {
     public currentTheme: Theme
 
     private themeMap: Record<Theme, ThemeColors> = {
+        [THEME.COQ]: {
+            background: '#10393b',
+            low: '#225251',
+            high: '#b8d5cb',
+            accent: '#d6c344',
+            pop: '#0094f0',
+            danger: '#c74706',
+        },
         [THEME.BLUE]: {
             background: '#1c2b35',
             low: '#2a5055',
@@ -64,7 +73,7 @@ class ThemeManager {
         },
         [THEME.SEAFOAM]: {
             background: '#243536',
-            low: '#546566',
+            low: '#446456',
             high: '#e0e0e0',
             accent: '#fae79d',
             pop: '#7ac3cf',
@@ -112,7 +121,7 @@ class ThemeManager {
         },
     }
 
-    constructor(initTheme: Theme = THEME.DARK) {
+    constructor(initTheme: Theme = THEME.COQ) {
         this.currentTheme = initTheme
     }
 

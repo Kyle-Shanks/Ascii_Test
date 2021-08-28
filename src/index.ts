@@ -1,14 +1,16 @@
 import { InputEvent, InputObserver } from 'src/classes/input'
 import Map from 'src/classes/map'
 import Enemy from 'src/classes/entities/enemy'
+import { EFFECT } from 'src/classes/effectManager'
 import { GAME_EVENT_TYPE } from 'src/classes/eventManager'
 import Player from 'src/classes/entities/player'
-import { THEME_COLOR } from 'src/classes/theme'
 import { CNV, CTX, CHARS, GRID_PAD, GRID_SIZE, ENTITY_TYPES } from 'src/core/constants'
 import { enemyStatsMap } from 'src/core/enemyData'
 import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
-import { CAMERA, EVENT_MANAGER, INPUT, LOG_MANAGER, THEME_MANAGER } from 'src/globals'
+import { CAMERA, EVENT_MANAGER, INPUT, LOG_MANAGER, THEME_MANAGER, MENU, EFFECT_MANAGER } from 'src/globals'
+
+let isMenuOpen = false
 
 let lightMap: Record<string, boolean> = {}
 let currentMap: number = 0
@@ -74,7 +76,7 @@ const drawBackground = () => {
 const drawDotGrid = (gridSize = GRID_SIZE) => {
     for (let i = GRID_PAD; i <= CNV.width - GRID_PAD; i += gridSize) {
         for (let j = GRID_PAD; j <= CNV.height - GRID_PAD; j += gridSize) {
-            CTX.fillStyle = THEME_MANAGER.getColors()[THEME_COLOR.LOW]
+            CTX.fillStyle = THEME_MANAGER.getColors().low
             CTX.font = `${gridSize}px Andale Mono`
             CTX.textAlign = 'center'
             CTX.textBaseline = 'middle'
@@ -196,6 +198,7 @@ const draw = () => {
     PLAYER.draw()
     drawLight(lightMap)
     drawUI()
+    if (isMenuOpen) MENU.draw()
 }
 
 // Watch Input
@@ -203,7 +206,18 @@ class InputWatcher implements InputObserver {
     readonly id = 'inputWatcher1'
 
     update = (event: InputEvent) => {
-        PLAYER.handleInput(event, MAP, enemies)
+        // Toggle menu
+        if (event.type === 'press' && event.key === 'Space') {
+            isMenuOpen = !isMenuOpen
+            return
+        }
+
+        if (isMenuOpen) {
+            MENU.handleInput(event)
+            draw()
+        } else {
+            PLAYER.handleInput(event, MAP, enemies)
+        }
     }
 }
 
@@ -211,7 +225,7 @@ const inputWatcher = new InputWatcher()
 INPUT.subscribe(inputWatcher)
 INPUT.listen()
 
-// Handler game events
+// Game event handlers
 const checkForDeadEnemies = () => {
     const deadEnemyArr: number[] = []
     enemies.forEach((enemy, idx) => {
@@ -252,7 +266,10 @@ const onPlayerDamaged = () => {
 
 // Initialize function
 const init = () => {
+    // Set Level
     setLevel(0)
+
+    // Set up event handlers
     EVENT_MANAGER.addHandler({
         type: GAME_EVENT_TYPE.PLAYER_DAMAGED,
         func: onPlayerDamaged,
@@ -265,13 +282,22 @@ const init = () => {
         type: GAME_EVENT_TYPE.PLAYER_ACTION,
         func: onPlayerAction,
     })
+
+    // Initial log
     LOG_MANAGER.addLog({ msg: `Welcome to the Dungeon` })
+
+    // Set CRT Effect
+    EFFECT_MANAGER.setEffect(EFFECT.CRT)
+
+    // Start frame function
     frame()
 }
 
 const frame = () => {
-    CAMERA.update()
-    draw()
+    if (!isMenuOpen) {
+        CAMERA.update()
+        draw()
+    }
     requestAnimationFrame(frame)
 }
 

@@ -7,6 +7,9 @@ export const CNV = document.getElementById('cnv') as HTMLCanvasElement
 export const CTX = CNV.getContext('2d') as CanvasRenderingContext2D
 export const CONTAINER = document.getElementById('cnvContainer') as HTMLDivElement
 
+export const FX_CNV = document.getElementById('fxCnv') as HTMLCanvasElement
+export const FX_CTX = FX_CNV.getContext('2d') as CanvasRenderingContext2D
+
 // Entity Characters
 export const CHARS = {
     DOT:      '·',
