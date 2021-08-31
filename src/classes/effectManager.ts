@@ -36,7 +36,7 @@ class EffectManager {
     private drawCrtEffect = () => {
         this.clearEffect()
 
-        const lineWidth = 3
+        const lineWidth = 3.5
         FX_CTX.fillStyle = `rgba(0,0,0,0.11)`
 
         // Lines

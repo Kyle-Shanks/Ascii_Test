@@ -9,6 +9,7 @@ class Room {
     readonly data: NumMatrix
     readonly position: Vector2
     readonly spawnPoint: Vector2
+    readonly keySpawnPoint: Vector2 | null
     readonly enemySpawnPoints: Vector2[]
 
     constructor(info: RoomInfo, pos: Vector2) {
@@ -21,6 +22,7 @@ class Room {
 
         this.position = pos
         this.spawnPoint = info.spawnPoint.add(pos)
+        this.keySpawnPoint = info.keySpawnPoint ? info.keySpawnPoint.add(pos) : null
         this.enemySpawnPoints = info.enemySpawnPoints.map((point) => point.add(pos))
     }
 

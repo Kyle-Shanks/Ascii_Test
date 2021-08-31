@@ -54,6 +54,15 @@ export type MapInfo = {
     title: string
 }
 
+const mapSizeInfo: Record<MapSize, { maxKeys: number, maxLockedRooms: number }> = {
+    [MAP_SIZE.XS]: { maxKeys: 1, maxLockedRooms: 0 },
+    [MAP_SIZE.S]: { maxKeys: 1, maxLockedRooms: 0 },
+    [MAP_SIZE.M]: { maxKeys: 2, maxLockedRooms: 1 },
+    [MAP_SIZE.L]: { maxKeys: 3, maxLockedRooms: 2 },
+    [MAP_SIZE.XL]: { maxKeys: 4, maxLockedRooms: 2 },
+    [MAP_SIZE.XXL]: { maxKeys: 5, maxLockedRooms: 3 },
+}
+
 const getRoomDataFromMapSize = (mapSize: MapSize): RoomInfo[] => {
     if (mapSize === MAP_SIZE.XS || mapSize === MAP_SIZE.S) {
         return roomData.filter((data) => (
@@ -172,6 +181,9 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     let furthestRoom = startingRoom
     let furthestDistance = 0
 
+    // Keep track of the locked rooms
+    const lockedRoomIds: string[] = []
+
     while (roomFillArr.length) {
         // Get random room info to insert new room around
         const anchorRoomInfo = roomFillArr[rand(roomFillArr.length)]
@@ -183,14 +195,26 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
         // Add new room
         if (newRoom) {
             const newRoomDistance = roomDistanceMap[anchorRoomInfo.room.id] + 1
+            let gateType: MapNum = MAP_NUM.GATE
             rooms.push(newRoom)
             insertIntoMatrix(newRoom.data, map, newRoom.position)
             roomDistanceMap[newRoom.id] = newRoomDistance
-            roomFillArr.push({
-                room: newRoom,
-                // Remove opposite direction bc thats the direction of the room we attached to
-                dirs: Vector2.DIRS.filter(d => !dir.isEqual(d.multiply(-1))),
-            })
+
+            if (
+                newRoomDistance >= 5
+                && newRoomDistance <= furthestDistance
+                && lockedRoomIds.length < mapSizeInfo[size].maxLockedRooms
+                && Math.random() > 0.6
+            ) {
+                gateType = MAP_NUM.DOOR
+                lockedRoomIds.push(newRoom.id)
+            } else {
+                roomFillArr.push({
+                    room: newRoom,
+                    // Remove opposite direction bc thats the direction of the room we attached to
+                    dirs: Vector2.DIRS.filter(d => !dir.isEqual(d.multiply(-1))),
+                })
+            }
 
             if (newRoomDistance > furthestDistance) {
                 furthestDistance = newRoomDistance
@@ -199,13 +223,13 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
 
             // Add the gate for the new room
             if (dir.isEqual(Vector2.UP)) {
-                map[newRoom.position.y + newRoom.height - 1][newRoom.position.x + 2] = MAP_NUM.GATE
+                map[newRoom.position.y + newRoom.height - 1][newRoom.position.x + 2] = gateType
             } else if (dir.isEqual(Vector2.LEFT)) {
-                map[newRoom.position.y + 2][newRoom.position.x + newRoom.width - 1] = MAP_NUM.GATE
+                map[newRoom.position.y + 2][newRoom.position.x + newRoom.width - 1] = gateType
             } else if (dir.isEqual(Vector2.RIGHT)) {
-                map[newRoom.position.y + 2][newRoom.position.x] = MAP_NUM.GATE
+                map[newRoom.position.y + 2][newRoom.position.x] = gateType
             } else if (dir.isEqual(Vector2.DOWN)) {
-                map[newRoom.position.y][newRoom.position.x + 2] = MAP_NUM.GATE
+                map[newRoom.position.y][newRoom.position.x + 2] = gateType
             }
         }
 
@@ -213,14 +237,136 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
         if (anchorRoomInfo.dirs.length === 0) roomFillArr.splice(roomFillArr.indexOf(anchorRoomInfo), 1)
     }
 
-    // Add portal
+    // Get normal rooms
+    const normalRooms = rooms.filter((room) => (
+        room.id !== startingRoom.id
+        && room.id !== furthestRoom.id
+        && !lockedRoomIds.includes(room.id)
+    ))
+
+    // TODO: Make this more efficient. This function is doing too many unnecessary checks
+    // Need a map of room that are connected already
+
+    // Poke holes between connected normal rooms for easier travel around the map
+    for (const room of normalRooms) {
+        for (const checkRoom of normalRooms) {
+            if (
+                room.id === checkRoom.id
+                || Math.abs(roomDistanceMap[room.id] - roomDistanceMap[checkRoom.id]) <= 1
+                || !room.isCollided(checkRoom)
+                || Math.random() > 0.7
+            ) {
+                continue
+            }
+
+            // Add gate between rooms
+            if (room.position.x + room.width - 1 === checkRoom.position.x) {
+                // connected on the right
+                if (
+                    room.position.y >= checkRoom.position.y
+                    && room.position.y < checkRoom.position.y + checkRoom.height - 3
+                    && map[room.position.y + 2][checkRoom.position.x + 1] !== MAP_NUM.WALL
+                ) {
+                    map[room.position.y + 2][checkRoom.position.x] = MAP_NUM.GATE
+                } else if (
+                    checkRoom.position.y >= room.position.y
+                    && checkRoom.position.y < room.position.y + room.height - 3
+                    && map[checkRoom.position.y + 2][checkRoom.position.x + 1] !== MAP_NUM.WALL
+                ) {
+                    map[checkRoom.position.y + 2][checkRoom.position.x] = MAP_NUM.GATE
+                }
+            } else if (room.position.x === checkRoom.position.x + checkRoom.width - 1) {
+                // connected on the left
+                if (
+                    room.position.y >= checkRoom.position.y
+                    && room.position.y < checkRoom.position.y + checkRoom.height - 3
+                    && map[room.position.y + 2][room.position.x - 1] !== MAP_NUM.WALL
+                ) {
+                    map[room.position.y + 2][room.position.x] = MAP_NUM.GATE
+                } else if (
+                    checkRoom.position.y >= room.position.y
+                    && checkRoom.position.y < room.position.y + room.height - 3
+                    && map[checkRoom.position.y + 2][room.position.x - 1] !== MAP_NUM.WALL
+                ) {
+                    map[checkRoom.position.y + 2][room.position.x] = MAP_NUM.GATE
+                }
+            } else if (room.position.y + room.height - 1 === checkRoom.position.y) {
+                // connected on the bottom
+                if (
+                    room.position.x >= checkRoom.position.x
+                    && room.position.x < checkRoom.position.x + checkRoom.width - 3
+                    && map[checkRoom.position.y + 1][room.position.x + 2] !== MAP_NUM.WALL
+                ) {
+                    map[checkRoom.position.y][room.position.x + 2] = MAP_NUM.GATE
+                } else if (
+                    checkRoom.position.x >= room.position.x
+                    && checkRoom.position.x < room.position.x + room.width - 3
+                    && map[checkRoom.position.y + 1][checkRoom.position.x + 2] !== MAP_NUM.WALL
+                ) {
+                    map[checkRoom.position.y][checkRoom.position.x + 2] = MAP_NUM.GATE
+                }
+            } else {
+                // connected on the top
+                if (
+                    room.position.x >= checkRoom.position.x
+                    && room.position.x < checkRoom.position.x + checkRoom.width - 3
+                    && map[room.position.y - 1][room.position.x + 2] !== MAP_NUM.WALL
+                ) {
+                    map[room.position.y][room.position.x + 2] = MAP_NUM.GATE
+                } else if (
+                    checkRoom.position.x >= room.position.x
+                    && checkRoom.position.x < room.position.x + room.width - 3
+                    && map[room.position.y - 1][checkRoom.position.x + 2] !== MAP_NUM.WALL
+                ) {
+                    map[room.position.y][checkRoom.position.x + 2] = MAP_NUM.GATE
+                }
+            }
+        }
+    }
+
+    // Get potential enemy rooms
+    const enemyRooms = rooms.filter((room) => (
+        room.enemySpawnPoints.length > 0
+            && roomDistanceMap[room.id] >= 2
+            && room.id !== furthestRoom.id
+    ))
+
+    // Keep track of number of keys placed
+    let keyCount = 0
+
+    // Populate enemies
+    let enemies: EnemyProps[] = []
+    enemyRooms.forEach((room) => {
+        if (Math.random() > 0.4) return
+
+        // TODO: Randomize enemy type based on map size and room depth
+        const roomEnemies = room.enemySpawnPoints.map((point) => (
+            {
+                position: point,
+                enemyType: ENEMY_TYPE.RAT,
+            }
+        ))
+
+        // Randomly put key in enemy room
+        if (room.keySpawnPoint !== null && keyCount < mapSizeInfo[size].maxKeys && Math.random() > 0.3) {
+            map[room.keySpawnPoint.y][room.keySpawnPoint.x] = MAP_NUM.KEY
+            keyCount++
+        }
+
+        enemies = [
+            ...enemies,
+            ...roomEnemies
+        ]
+    })
+
+    // Add portal in furthest room
     map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
 
-    console.log({ map, rooms, roomDistanceMap })
+    // console.log({ map, rooms, roomDistanceMap, enemies })
     return {
         title: `${Date.now()}`,
         startPosition: startingRoom.spawnPoint,
-        enemies: [],
+        enemies,
         data: map,
     }
 }

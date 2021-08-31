@@ -1,8 +1,8 @@
 import { CNV, CTX } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
+import EffectManager, { EFFECT } from 'src/classes/effectManager'
 import { InputEvent } from 'src/classes/input'
 import ThemeManager, { THEME } from 'src/classes/theme'
-import EffectManager, { EFFECT } from './effectManager'
 
 type MenuProps = {
     effectManager: EffectManager
@@ -56,7 +56,7 @@ class Menu {
             },
         ]
 
-        this.borderSize = 10
+        this.borderSize = 14
         this.optionSpacing = 100
         this.headerSpacing = 70
         this.height = 20 + (this.borderSize * 2) + this.headerSpacing + (this.options.length * this.optionSpacing)
@@ -93,14 +93,30 @@ class Menu {
             this.height - this.borderSize * 2,
         )
 
-        // Draw Header
-        CTX.font = `28px Andale Mono`
+        // Draw command text
+        CTX.fillStyle = this.themeManager.getColors().low
+        CTX.fillRect(
+            this.position.x + this.width / 2 - 60,
+            this.position.y + this.height - this.borderSize,
+            120,
+            this.borderSize,
+        )
+
+        CTX.font = `20px Andale Mono`
         CTX.textAlign = 'center'
         CTX.textBaseline = 'middle'
-
         CTX.fillStyle = this.themeManager.getColors().accent
         CTX.fillText(
-            '- Settings -',
+            '[ space ]',
+            this.position.x + this.width / 2,
+            this.position.y + this.height - 10
+        )
+
+        // Draw Header
+        CTX.font = `28px Andale Mono`
+
+        CTX.fillText(
+            '- Menu -',
             this.position.x + this.width / 2,
             this.position.y + this.borderSize + this.headerSpacing / 2
         )

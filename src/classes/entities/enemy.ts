@@ -38,7 +38,7 @@ class Enemy extends Actor {
     update = (map: Map, player: Player, enemies: Enemy[]) => {
         switch (this.state) {
             case ENEMY_STATE.IDLE:
-                if (this.canSeePlayer(player, map)) {
+                if (!this.isOutsideGrid() && this.canSeePlayer(player, map)) {
                     this.moveTimer = 0
                     this.state = ENEMY_STATE.CHASE
                 }
