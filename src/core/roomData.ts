@@ -53,10 +53,10 @@ const roomData: RoomInfo[] = [
     {
         type: ROOM_TYPE.MINI,
         spawnPoint: new Vector2(4,2),
-        keySpawnPoint: null,
+        keySpawnPoint: new Vector2(4,2),
         enemySpawnPoints: [
-            new Vector2(3, 2),
-            new Vector2(6, 2),
+            new Vector2(3,2),
+            new Vector2(6,2),
         ],
         data: [
             [0,0,0,0,0,0,0,0,0,0],
@@ -69,7 +69,7 @@ const roomData: RoomInfo[] = [
     {
         type: ROOM_TYPE.MINI,
         spawnPoint: new Vector2(2,4),
-        keySpawnPoint: null,
+        keySpawnPoint: new Vector2(2,4),
         enemySpawnPoints: [
             new Vector2(2,3),
             new Vector2(2,6),
@@ -246,7 +246,7 @@ const roomData: RoomInfo[] = [
             [0,_,_,_,_,_,_,_,_,_,_,0],
             [0,_,_,_,_,_,_,_,_,_,_,0],
             [0,_,_,_,_,_,_,_,_,_,_,0],
-            [0,_,_,_,0,0,0,_,_,0,0,0],
+            [0,_,_,_,0,0,0,1,1,0,0,0],
             [0,_,_,_,0,_,_,_,_,_,_,0],
             [0,_,_,_,0,_,_,_,_,_,_,0],
             [0,_,_,_,0,_,_,_,_,_,_,0],
@@ -260,6 +260,7 @@ const roomData: RoomInfo[] = [
         type: ROOM_TYPE.MID,
         spawnPoint: new Vector2(5,5),
         keySpawnPoint: new Vector2(5,5),
+        // TODO: Fix these
         enemySpawnPoints: [
             new Vector2(2,2),
             new Vector2(9,2),
@@ -276,12 +277,12 @@ const roomData: RoomInfo[] = [
             [0,_,_,_,_,_,_,_,_,_,_,0],
             [0,_,_,0,0,0,0,0,0,_,_,0],
             [0,_,_,0,_,_,_,_,0,_,_,0],
-            [0,_,_,_,_,_,_,_,_,_,_,0],
-            [0,_,_,_,_,_,_,_,_,_,_,0],
+            [0,_,_,1,_,_,_,_,1,_,_,0],
+            [0,_,_,1,_,_,_,_,1,_,_,0],
             [0,_,_,0,_,_,_,_,0,_,_,0],
-            [0,_,_,0,0,0,0,0,0,_,_,0],
-            [0,_,_,_,_,_,_,_,_,_,_,0],
-            [0,_,_,_,_,_,_,_,_,_,_,0],
+            [0,_,_,0,0,_,_,0,0,_,_,0],
+            [0,_,_,_,0,_,_,0,_,_,_,0],
+            [0,_,_,_,0,_,_,0,_,_,_,0],
             [0,0,0,0,0,0,0,0,0,0,0,0],
         ]
     },
@@ -290,17 +291,16 @@ const roomData: RoomInfo[] = [
         spawnPoint: new Vector2(2,5),
         keySpawnPoint: null,
         enemySpawnPoints: [
-            new Vector2(6,4),
-            new Vector2(9,5),
+            new Vector2(6,6),
+            new Vector2(9,2),
         ],
         data: [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,_,_,_,_,_,_,_,_,_,_,0,_,_,_,0],
             [0,_,_,_,_,_,_,_,_,_,_,0,_,_,_,0],
-            [0,_,_,_,0,0,0,0,0,_,_,0,_,_,_,0],
-            [0,_,_,_,0,_,_,_,_,_,_,0,_,_,_,0],
-            [0,_,_,_,0,_,_,_,_,_,_,0,_,_,_,0],
-            [0,_,_,_,0,_,_,0,0,0,0,0,_,_,_,0],
+            [0,_,_,_,_,_,_,_,_,_,_,0,_,_,_,0],
+            [0,_,_,_,0,0,0,1,1,0,0,0,_,_,_,0],
+            [0,_,_,_,0,_,_,_,_,_,_,_,_,_,_,0],
             [0,_,_,_,0,_,_,_,_,_,_,_,_,_,_,0],
             [0,_,_,_,0,_,_,_,_,_,_,_,_,_,_,0],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -338,7 +338,7 @@ const roomData: RoomInfo[] = [
     {
         type: ROOM_TYPE.MID,
         spawnPoint: new Vector2(5,2),
-        keySpawnPoint: null,
+        keySpawnPoint: new Vector2(4, 9),
         enemySpawnPoints: [
             new Vector2(4, 7),
             new Vector2(7, 7),

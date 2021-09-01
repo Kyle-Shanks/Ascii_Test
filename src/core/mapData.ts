@@ -202,6 +202,7 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
 
             if (
                 newRoomDistance >= 5
+                && newRoom.type === ROOM_TYPE.MINI
                 && newRoomDistance <= furthestDistance
                 && lockedRoomIds.length < mapSizeInfo[size].maxLockedRooms
                 && Math.random() > 0.6
@@ -305,7 +306,7 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
                 ) {
                     map[checkRoom.position.y][checkRoom.position.x + 2] = MAP_NUM.GATE
                 }
-            } else {
+            } else if (room.position.y === checkRoom.position.y + checkRoom.height - 1) {
                 // connected on the top
                 if (
                     room.position.x >= checkRoom.position.x
@@ -325,10 +326,8 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     }
 
     // Get potential enemy rooms
-    const enemyRooms = rooms.filter((room) => (
-        room.enemySpawnPoints.length > 0
-            && roomDistanceMap[room.id] >= 2
-            && room.id !== furthestRoom.id
+    const enemyRooms = normalRooms.filter((room) => (
+        room.enemySpawnPoints.length > 0 && roomDistanceMap[room.id] >= 2
     ))
 
     // Keep track of number of keys placed
@@ -337,9 +336,9 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     // Populate enemies
     let enemies: EnemyProps[] = []
     enemyRooms.forEach((room) => {
-        if (Math.random() > 0.4) return
+        if (Math.random() > 0.7) return
 
-        // TODO: Randomize enemy type based on map size and room depth
+        // TODO: Randomize enemy type based on map size and room depth and number of enemy spawn point in room
         const roomEnemies = room.enemySpawnPoints.map((point) => (
             {
                 position: point,
@@ -348,7 +347,11 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
         ))
 
         // Randomly put key in enemy room
-        if (room.keySpawnPoint !== null && keyCount < mapSizeInfo[size].maxKeys && Math.random() > 0.3) {
+        if (
+            room.keySpawnPoint !== null
+            && keyCount < mapSizeInfo[size].maxKeys
+            && Math.random() > 0.3
+        ) {
             map[room.keySpawnPoint.y][room.keySpawnPoint.x] = MAP_NUM.KEY
             keyCount++
         }
