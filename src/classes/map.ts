@@ -1,26 +1,28 @@
 import Entity from 'src/classes/entities/entity'
 import { THEME_COLOR } from 'src/classes/theme'
 import { ENTITY_TYPES } from 'src/core/constants'
-import { MAP_NUM, MapInfo, MapData, MapNumMap } from 'src/core/mapData'
+import { MAP_NUM, MapInfo, MapData, MapNumMap, MapSize } from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 
 class Map {
-    height: number
-    width: number
-    title: string
+    readonly height: number
+    readonly width: number
+    readonly size: MapSize
+    readonly title: string
+    readonly startPosition: Vector2
+    readonly seenMap: Record<string, boolean>
     data: MapData
     entities: Entity[]
     objects: Entity[]
     solids: Entity[]
     opaques: Entity[]
-    startPosition: Vector2
-    seenMap: Record<string, boolean>
 
     constructor(info: MapInfo) {
         this.title = info.title
         this.data = info.data
         this.height = info.data.length
         this.width = info.data[0].length
+        this.size = info.size
         this.startPosition = info.startPosition
         this.seenMap = {}
 

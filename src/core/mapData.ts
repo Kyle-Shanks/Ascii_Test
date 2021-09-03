@@ -8,7 +8,7 @@ import { rand } from 'src/core/util'
 // To make the map data visually easier to read
 const _ = null
 
-const MAP_SIZE = {
+export const MAP_SIZE = {
     XS: 24,
     S: 32,
     M: 48,
@@ -17,7 +17,7 @@ const MAP_SIZE = {
     XXL: 128,
 } as const
 
-type MapSize = typeof MAP_SIZE[keyof typeof MAP_SIZE]
+export type MapSize = typeof MAP_SIZE[keyof typeof MAP_SIZE]
 
 export const MAP_NUM = {
     WALL: 0,
@@ -51,6 +51,7 @@ type EnemyProps = {
 
 export type MapInfo = {
     data: MapData
+    size: MapSize
     enemies: EnemyProps[]
     startPosition: Vector2
     title: string
@@ -415,9 +416,10 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
 
     // console.log({ map, rooms, roomDistanceMap, enemies })
     return {
+        size,
+        enemies,
         title: `${Date.now()}`,
         startPosition: startingRoom.spawnPoint,
-        enemies,
         data: map,
     }
 }
@@ -439,6 +441,7 @@ const mapData: MapInfo[] = [
     // Test Levels
     {
         title: 'Test Level',
+        size: MAP_SIZE.XS,
         startPosition: new Vector2(3, 3),
         enemies: [
             {
@@ -471,6 +474,7 @@ const mapData: MapInfo[] = [
     },
     {
         title: 'Test Level 2',
+        size: MAP_SIZE.XS,
         startPosition: new Vector2(3, 3),
         enemies: [],
         data: [
@@ -486,6 +490,7 @@ const mapData: MapInfo[] = [
     },
     {
         title: 'Bigger Test Level',
+        size: MAP_SIZE.M,
         startPosition: new Vector2(2, 10),
         enemies: [],
         data: [
@@ -526,6 +531,7 @@ const mapData: MapInfo[] = [
     },
     {
         title: 'Open Test Level',
+        size: MAP_SIZE.L,
         startPosition: new Vector2(19, 14),
         enemies: [
             {

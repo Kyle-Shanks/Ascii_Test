@@ -162,6 +162,7 @@ const drawLight = (lightMap: Record<string, boolean>) => {
     })
 }
 
+// TODO: Make this 3 * GRID_SIZE height
 const drawUI = () => {
     CTX.fillStyle = THEME_MANAGER.getColors().low
     CTX.fillRect(0, CNV.height - 80, CNV.width, 80)
@@ -198,7 +199,10 @@ const draw = () => {
     PLAYER.draw()
     drawLight(lightMap)
     drawUI()
-    if (isMenuOpen) MENU.draw()
+    if (isMenuOpen) {
+        MENU.draw()
+        MENU.drawMiniMap(MAP, PLAYER)
+    }
 }
 
 // Watch Input

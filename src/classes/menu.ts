@@ -1,7 +1,10 @@
-import { CNV, CTX } from 'src/core/constants'
+import { CNV, CTX, GRID_SIZE } from 'src/core/constants'
+import { MAP_NUM, MAP_SIZE, MapSize } from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import EffectManager, { EFFECT } from 'src/classes/effectManager'
+import Player from 'src/classes/entities/player'
 import { InputEvent } from 'src/classes/input'
+import Map from 'src/classes/map'
 import ThemeManager, { THEME } from 'src/classes/theme'
 
 type MenuProps = {
@@ -27,6 +30,10 @@ class Menu {
     readonly optionSpacing: number
     readonly headerSpacing: number
     readonly position: Vector2
+
+    readonly miniMapHeight: number
+    readonly miniMapWidth: number
+    readonly miniMapPosition: Vector2
 
     private effectManager: EffectManager
     private themeManager: ThemeManager
@@ -61,10 +68,15 @@ class Menu {
         this.headerSpacing = 70
         this.height = 20 + (this.borderSize * 2) + this.headerSpacing + (this.options.length * this.optionSpacing)
         this.width = 300 + (this.borderSize * 2)
-        this.position = new Vector2(
-            (CNV.width - this.width) / 2,
-            (CNV.height - this.height) / 2
-        )
+        // this.position = new Vector2(
+        //     (CNV.width - this.width) / 2,
+        //     (CNV.height - this.height) / 2
+        // )
+        this.position = new Vector2(GRID_SIZE, GRID_SIZE)
+
+        this.miniMapHeight = CNV.height - GRID_SIZE * 5
+        this.miniMapWidth = CNV.width - (GRID_SIZE * 3 + this.width)
+        this.miniMapPosition = new Vector2(GRID_SIZE * 2 + this.width, GRID_SIZE)
     }
 
     handleInput = (event: InputEvent) => {
@@ -147,6 +159,79 @@ class Menu {
             this.position.y + this.borderSize + this.headerSpacing + 11 + (this.cursorIndex * this.optionSpacing),
             12.5,
             12.5
+        )
+    }
+
+    drawMiniMap = (map: Map, player: Player) => {
+        // Border
+        CTX.fillStyle = this.themeManager.getColors().high
+        CTX.fillRect(this.miniMapPosition.x, this.miniMapPosition.y, this.miniMapWidth, this.miniMapHeight)
+
+        // Background
+        CTX.fillStyle = this.themeManager.getColors().background
+        CTX.fillRect(
+            this.miniMapPosition.x + this.borderSize,
+            this.miniMapPosition.y + this.borderSize,
+            this.miniMapWidth - this.borderSize * 2,
+            this.miniMapHeight - this.borderSize * 2,
+        )
+
+        const miniMapSizes: Record<MapSize, number> = {
+            [MAP_SIZE.XS]: 28,
+            [MAP_SIZE.S]: 20,
+            [MAP_SIZE.M]: 14,
+            [MAP_SIZE.L]: 10,
+            [MAP_SIZE.XL]: 7, // Or 7.5
+            [MAP_SIZE.XXL]: 5
+        }
+
+        const mapPos = this.miniMapPosition.add(new Vector2(GRID_SIZE * 1.5, GRID_SIZE * 1.5))
+        const miniMapSize = miniMapSizes[map.size]
+
+        // Draw visible map
+        map.data.forEach((row, y) => {
+            row.forEach((cell, x) => {
+                if (cell === null) return
+                // TODO: If player doesn't have in game map
+                // if (!map.seenMap[`${x},${y}`]) return
+
+                // Draw everything
+                switch (cell) {
+                    case MAP_NUM.WALL:
+                        CTX.fillStyle = this.themeManager.getColors().high
+                        break
+                    case MAP_NUM.GATE:
+                    case MAP_NUM.DOOR:
+                    case MAP_NUM.PORTAL:
+                    case MAP_NUM.POTION:
+                    case MAP_NUM.KEY:
+                        CTX.fillStyle = this.themeManager.getColors().accent
+                        break
+                    default:
+                        CTX.fillStyle = this.themeManager.getColors().background
+                }
+
+                if (!map.seenMap[`${x},${y}`]) {
+                    if (cell !== MAP_NUM.WALL && cell !== MAP_NUM.DOOR && cell !== MAP_NUM.GATE) return
+                    CTX.fillStyle = this.themeManager.getColors().low
+                }
+
+                CTX.fillRect(
+                    mapPos.x + x * miniMapSize,
+                    mapPos.y + y * miniMapSize,
+                    miniMapSize,
+                    miniMapSize,
+                )
+            })
+        })
+
+        // Draw player position
+        CTX.fillStyle = this.themeManager.getColors().pop
+        CTX.fillRect(
+            mapPos.x + player.position.x * miniMapSize,
+            mapPos.y + player.position.y * miniMapSize,
+            miniMapSize,
+            miniMapSize,
         )
     }
 
