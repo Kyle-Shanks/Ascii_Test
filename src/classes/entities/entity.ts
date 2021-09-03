@@ -86,6 +86,12 @@ export const TYPE_SETTINGS_MAP: Record<EntityType, EntitySettings> = {
         opaque: false,
         solid: false,
     },
+    [ENTITY_TYPES.POTION]: {
+        char: CHARS.AMP,
+        color: THEME_COLOR.ACCENT,
+        opaque: false,
+        solid: false,
+    },
 } as const
 
 export type EntityProps = {

@@ -25,7 +25,8 @@ export const MAP_NUM = {
     DOOR: 2,
     KEY: 3,
     PORTAL: 4,
-    GOLD: 5
+    GOLD: 5,
+    POTION: 6,
 } as const
 
 export type MapNum = typeof MAP_NUM[keyof typeof MAP_NUM]
@@ -38,6 +39,7 @@ export const MapNumMap: Record<MapNum, EntityType> = {
     [MAP_NUM.KEY]: ENTITY_TYPES.KEY,
     [MAP_NUM.GOLD]: ENTITY_TYPES.GOLD,
     [MAP_NUM.PORTAL]: ENTITY_TYPES.PORTAL,
+    [MAP_NUM.POTION]: ENTITY_TYPES.POTION,
 } as const
 
 export type MapData = (MapNum | null)[][]
@@ -55,20 +57,26 @@ export type MapInfo = {
 }
 
 const mapSizeInfo: Record<MapSize, { maxKeys: number, maxLockedRooms: number }> = {
-    [MAP_SIZE.XS]: { maxKeys: 1, maxLockedRooms: 0 },
-    [MAP_SIZE.S]: { maxKeys: 1, maxLockedRooms: 0 },
-    [MAP_SIZE.M]: { maxKeys: 2, maxLockedRooms: 1 },
-    [MAP_SIZE.L]: { maxKeys: 3, maxLockedRooms: 2 },
-    [MAP_SIZE.XL]: { maxKeys: 4, maxLockedRooms: 2 },
-    [MAP_SIZE.XXL]: { maxKeys: 5, maxLockedRooms: 3 },
+    [MAP_SIZE.XS]: { maxKeys: 0, maxLockedRooms: 0 },
+    [MAP_SIZE.S]: { maxKeys: 1, maxLockedRooms: 1 },
+    [MAP_SIZE.M]: { maxKeys: 2, maxLockedRooms: 2 },
+    [MAP_SIZE.L]: { maxKeys: 2, maxLockedRooms: 3 },
+    [MAP_SIZE.XL]: { maxKeys: 3, maxLockedRooms: 3 },
+    [MAP_SIZE.XXL]: { maxKeys: 3, maxLockedRooms: 5 },
 }
 
 const getRoomDataFromMapSize = (mapSize: MapSize): RoomInfo[] => {
     if (mapSize === MAP_SIZE.XS || mapSize === MAP_SIZE.S) {
         return roomData.filter((data) => (
-            data.type !== ROOM_TYPE.LARGE && data.type !== ROOM_TYPE.JUMBO
+            data.type !== ROOM_TYPE.MID
+            && data.type !== ROOM_TYPE.LARGE
+            && data.type !== ROOM_TYPE.JUMBO
         ))
     } else if (mapSize === MAP_SIZE.M) {
+        return roomData.filter((data) => (
+            data.type !== ROOM_TYPE.LARGE && data.type !== ROOM_TYPE.JUMBO
+        ))
+    } else if (mapSize === MAP_SIZE.L) {
         return roomData.filter((data) => data.type !== ROOM_TYPE.JUMBO)
     } else {
         return roomData
@@ -150,6 +158,7 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
     const roomDistanceMap: Record<string, number> = {}
+    const roomTree: Record<string, string[]> = {}
     // Array of room information where more rooms need to be attached
     const roomFillArr: { room: Room, dirs: Vector2[] }[] = []
 
@@ -172,6 +181,7 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     insertIntoMatrix(startingRoom.data, map, startingRoom.position)
     rooms.push(startingRoom)
     roomDistanceMap[startingRoom.id] = 0
+    roomTree[startingRoom.id] = []
     roomFillArr.push({
         room: startingRoom,
         dirs: [...Vector2.DIRS],
@@ -199,16 +209,21 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
             rooms.push(newRoom)
             insertIntoMatrix(newRoom.data, map, newRoom.position)
             roomDistanceMap[newRoom.id] = newRoomDistance
+            roomTree[newRoom.id] = []
+            roomTree[anchorRoomInfo.room.id].push(newRoom.id)
 
             if (
                 newRoomDistance >= 5
                 && newRoom.type === ROOM_TYPE.MINI
+                && newRoom.itemSpawnPoint !== null
                 && newRoomDistance <= furthestDistance
                 && lockedRoomIds.length < mapSizeInfo[size].maxLockedRooms
-                && Math.random() > 0.6
+                && Math.random() > 0.7
             ) {
                 gateType = MAP_NUM.DOOR
                 lockedRoomIds.push(newRoom.id)
+                // TODO: Spawn either potion or item for stats
+                map[newRoom.itemSpawnPoint.y][newRoom.itemSpawnPoint.x] = MAP_NUM.POTION
             } else {
                 roomFillArr.push({
                     room: newRoom,
@@ -238,7 +253,7 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
         if (anchorRoomInfo.dirs.length === 0) roomFillArr.splice(roomFillArr.indexOf(anchorRoomInfo), 1)
     }
 
-    // Get normal rooms
+    // Get normal rooms (not start, end, or locked rooms)
     const normalRooms = rooms.filter((room) => (
         room.id !== startingRoom.id
         && room.id !== furthestRoom.id
@@ -253,7 +268,8 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
         for (const checkRoom of normalRooms) {
             if (
                 room.id === checkRoom.id
-                || Math.abs(roomDistanceMap[room.id] - roomDistanceMap[checkRoom.id]) <= 1
+                || roomTree[room.id].includes(checkRoom.id)
+                || roomTree[checkRoom.id].includes(room.id)
                 || !room.isCollided(checkRoom)
                 || Math.random() > 0.7
             ) {
@@ -269,12 +285,16 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
                     && map[room.position.y + 2][checkRoom.position.x + 1] !== MAP_NUM.WALL
                 ) {
                     map[room.position.y + 2][checkRoom.position.x] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 } else if (
                     checkRoom.position.y >= room.position.y
                     && checkRoom.position.y < room.position.y + room.height - 3
                     && map[checkRoom.position.y + 2][checkRoom.position.x + 1] !== MAP_NUM.WALL
                 ) {
                     map[checkRoom.position.y + 2][checkRoom.position.x] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 }
             } else if (room.position.x === checkRoom.position.x + checkRoom.width - 1) {
                 // connected on the left
@@ -284,12 +304,16 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
                     && map[room.position.y + 2][room.position.x - 1] !== MAP_NUM.WALL
                 ) {
                     map[room.position.y + 2][room.position.x] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 } else if (
                     checkRoom.position.y >= room.position.y
                     && checkRoom.position.y < room.position.y + room.height - 3
                     && map[checkRoom.position.y + 2][room.position.x - 1] !== MAP_NUM.WALL
                 ) {
                     map[checkRoom.position.y + 2][room.position.x] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 }
             } else if (room.position.y + room.height - 1 === checkRoom.position.y) {
                 // connected on the bottom
@@ -299,12 +323,16 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
                     && map[checkRoom.position.y + 1][room.position.x + 2] !== MAP_NUM.WALL
                 ) {
                     map[checkRoom.position.y][room.position.x + 2] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 } else if (
                     checkRoom.position.x >= room.position.x
                     && checkRoom.position.x < room.position.x + room.width - 3
                     && map[checkRoom.position.y + 1][checkRoom.position.x + 2] !== MAP_NUM.WALL
                 ) {
                     map[checkRoom.position.y][checkRoom.position.x + 2] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 }
             } else if (room.position.y === checkRoom.position.y + checkRoom.height - 1) {
                 // connected on the top
@@ -314,16 +342,29 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
                     && map[room.position.y - 1][room.position.x + 2] !== MAP_NUM.WALL
                 ) {
                     map[room.position.y][room.position.x + 2] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 } else if (
                     checkRoom.position.x >= room.position.x
                     && checkRoom.position.x < room.position.x + room.width - 3
                     && map[room.position.y - 1][checkRoom.position.x + 2] !== MAP_NUM.WALL
                 ) {
                     map[room.position.y][checkRoom.position.x + 2] = MAP_NUM.GATE
+                    roomTree[room.id].push(checkRoom.id)
+                    roomTree[checkRoom.id].push(room.id)
                 }
             }
         }
     }
+
+    // Add gold to lone rooms (rooms with only one entrance)
+    // TODO: Update to spawn either gold (80% chance), a key (10% chance), or a potion (10% chance)
+    const loneRooms = normalRooms.filter((room) => roomTree[room.id].length === 0)
+    loneRooms.forEach((room) => {
+        room.goldSpawnPoints.forEach((point) => {
+            if (map[point.y][point.x] === null) map[point.y][point.x] = MAP_NUM.GOLD
+        })
+    })
 
     // Get potential enemy rooms
     const enemyRooms = normalRooms.filter((room) => (
@@ -346,13 +387,13 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
             }
         ))
 
-        // Randomly put key in enemy room
+        // Randomly put key in enemy room (50% chance)
         if (
-            room.keySpawnPoint !== null
+            room.itemSpawnPoint !== null
             && keyCount < mapSizeInfo[size].maxKeys
-            && Math.random() > 0.3
+            && Math.random() > 0.5
         ) {
-            map[room.keySpawnPoint.y][room.keySpawnPoint.x] = MAP_NUM.KEY
+            map[room.itemSpawnPoint.y][room.itemSpawnPoint.x] = MAP_NUM.KEY
             keyCount++
         }
 
@@ -364,6 +405,13 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
 
     // Add portal in furthest room
     map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
+
+    console.log({
+        keyCount,
+        rooms: rooms.length,
+        lockedRooms: lockedRoomIds.length,
+        loneRooms: loneRooms.length,
+    })
 
     // console.log({ map, rooms, roomDistanceMap, enemies })
     return {

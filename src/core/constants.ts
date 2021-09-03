@@ -17,6 +17,7 @@ export const CHARS = {
     SEMI:     ';',
     COLON:    ':',
     AT:       '@',
+    AMP:      '&',
     HASH:     '#',
     DOLLAR:   '$',
     STAR:     '*',
@@ -76,6 +77,7 @@ export const ENTITY_TYPES = {
     KEY: 'Key',
     PORTAL: 'Portal',
     GOLD: 'Gold',
+    POTION: 'Potion'
 } as const
 
 export type EntityType = typeof ENTITY_TYPES[keyof typeof ENTITY_TYPES]

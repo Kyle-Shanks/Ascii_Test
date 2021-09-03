@@ -90,6 +90,11 @@ class Player extends Actor {
                     this.inventory[ENTITY_TYPES.GOLD]++
                     map.removeObject(entityAtPosition)
                     break
+                case ENTITY_TYPES.POTION:
+                    this.heal(5)
+                    map.removeObject(entityAtPosition)
+                    this.logManager.addLog({ msg: 'You healed 5 HP from a potion!' })
+                    break
             }
         }
     }
