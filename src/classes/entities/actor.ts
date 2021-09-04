@@ -1,5 +1,5 @@
 import Entity, { EntityProps } from 'src/classes/entities/entity'
-import EventManager, { GAME_EVENT_TYPE } from 'src/classes/eventManager'
+import EventManager from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
@@ -45,14 +45,13 @@ class Actor extends Entity {
         this.health = Math.min(this.health + amount, this.stats.HP)
     }
 
-    protected attack = (actor: Actor) => {
+    protected attack = (actor: Actor): boolean => {
         // TODO: Log miss
-        if (this.stats.ACC < (Math.random() * 100)) return
+        if (this.stats.ACC < (Math.random() * 100)) return false
 
         // TODO: Log Hit
         actor.takeDamage(this.stats.STR)
-        // If player got hit, dispatch hit event
-        if (actor.type === ENTITY_TYPES.PLAYER) this.eventManager.dispatch(GAME_EVENT_TYPE.PLAYER_DAMAGED)
+        return true
     }
 
     protected findPath = (pos: Vector2, map: Map): Vector2[] | null => {

@@ -174,6 +174,7 @@ const drawUI = () => {
     CTX.textBaseline = 'middle'
 
     CTX.fillText(`Map: ${MAP.title}`, CNV.width / 2 + 180, CNV.height - 25)
+    CTX.fillText(`EXP: ${PLAYER.currentExp}/${PLAYER.maxExp}`, CNV.width / 2 + 360, CNV.height - 55)
     CTX.fillStyle = THEME_MANAGER.getColors().danger
     CTX.fillText(`HP: ${PLAYER.health}/${PLAYER.stats.HP}`, CNV.width / 2 + 180, CNV.height - 55)
 

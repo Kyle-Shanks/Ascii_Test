@@ -213,6 +213,7 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
             roomTree[newRoom.id] = []
             roomTree[anchorRoomInfo.room.id].push(newRoom.id)
 
+            // Randomly add locked rooms
             if (
                 newRoomDistance >= 5
                 && newRoom.type === ROOM_TYPE.MINI
@@ -407,14 +408,13 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     // Add portal in furthest room
     map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
 
-    console.log({
-        keyCount,
-        rooms: rooms.length,
-        lockedRooms: lockedRoomIds.length,
-        loneRooms: loneRooms.length,
-    })
+    // console.log({
+    //     keyCount,
+    //     rooms: rooms.length,
+    //     lockedRooms: lockedRoomIds.length,
+    //     loneRooms: loneRooms.length,
+    // })
 
-    // console.log({ map, rooms, roomDistanceMap, enemies })
     return {
         size,
         enemies,

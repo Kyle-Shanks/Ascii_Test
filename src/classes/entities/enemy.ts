@@ -1,6 +1,6 @@
 import Actor, { ActorProps } from 'src/classes/entities/actor'
 import Player from 'src/classes/entities/player'
-import EventManager from 'src/classes/eventManager'
+import EventManager, { GAME_EVENT_TYPE } from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
 import { ENTITY_TYPES } from 'src/core/constants'
@@ -17,12 +17,14 @@ type EnemyState = typeof ENEMY_STATE[keyof typeof ENEMY_STATE]
 interface EnemyProps extends ActorProps {
     enemyType: EnemyType
     moveSpeed: number
+    exp: number
 }
 
 class Enemy extends Actor {
     enemyType: EnemyType
     state: EnemyState
     moveSpeed: number
+    exp: number
     private moveTimer: number
 
     constructor(props: EnemyProps, logManager: LogManager, eventManager: EventManager) {
@@ -30,6 +32,7 @@ class Enemy extends Actor {
         this.type = ENTITY_TYPES.ENEMY
         this.enemyType = props.enemyType
         this.state = ENEMY_STATE.IDLE
+        this.exp = props.exp
 
         this.moveSpeed = props.moveSpeed
         this.moveTimer = 0
@@ -46,7 +49,8 @@ class Enemy extends Actor {
             case ENEMY_STATE.CHASE:
                 if (this.moveTimer === 0) {
                     if (this.canAttackPlayer(player)) {
-                        this.attack(player)
+                        const hit = this.attack(player)
+                        if (hit) this.eventManager.dispatch(GAME_EVENT_TYPE.PLAYER_DAMAGED)
                     } else if (this.position.distanceTo(player.position) > 8) {
                         this.state = ENEMY_STATE.IDLE
                     } else {

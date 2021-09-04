@@ -5,6 +5,7 @@ import { InputEvent, InputKey } from 'src/classes/input'
 import EventManager, { GAME_EVENT_TYPE } from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
+import { THEME_COLOR } from 'src/classes/theme'
 import { ENTITY_TYPES } from 'src/core/constants'
 import { Vector2 } from 'src/core/types'
 
@@ -22,11 +23,19 @@ type Inventory = {
 class Player extends Actor {
     private _pressActionMap: ActionMap
     private _releaseActionMap: ActionMap
+
+    currentExp: number
+    maxExp: number
+    level: number
     inventory: Inventory
 
     constructor(props: PlayerProps, logManager: LogManager, eventManager: EventManager) {
         super(props, logManager, eventManager)
         this.type = ENTITY_TYPES.PLAYER
+
+        this.level = 1
+        this.currentExp = 0
+        this.maxExp = 10
 
         this.inventory = {
             [ENTITY_TYPES.GOLD]: 0,
@@ -61,6 +70,24 @@ class Player extends Actor {
         } else if (event.type === 'release') {
             this._releaseActionMap[event.key](map, enemies)
         }
+    }
+
+    private gainExp = (exp: number) => {
+        this.currentExp += exp
+        if (this.currentExp >= this.maxExp) this.levelUp()
+    }
+
+    private levelUp = () => {
+        this.currentExp = Math.max(this.currentExp - this.maxExp, 0)
+        this.level++
+        // TODO: Add more sophisticated max exp increase per level
+        this.maxExp *= 2
+
+        // Increase max health and refill health
+        this.stats.HP += (2 * this.level)
+        this.health = this.stats.HP
+
+        this.logManager.addLog({ msg: `Leveled Up to level ${this.level}!`, color: THEME_COLOR.ACCENT })
     }
 
     private _walk = (dir: Vector2, map: Map, enemies: Enemy[]) => {
@@ -102,6 +129,7 @@ class Player extends Actor {
     private _walkInto = (entity: Entity) => {
         if (entity instanceof Enemy) {
             this.attack(entity)
+            if (entity.health === 0) this.gainExp(entity.exp)
             this.eventManager.dispatch(GAME_EVENT_TYPE.PLAYER_MOVE)
         } else {
             // Do things based on type here
