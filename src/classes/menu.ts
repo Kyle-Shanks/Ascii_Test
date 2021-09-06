@@ -23,13 +23,30 @@ type MenuOption = {
 const themeArr = Object.values(THEME)
 const effectArr = Object.values(EFFECT)
 
+const statMap = [
+    (p: Player) => `LVL: ${p.level}`,
+    (p: Player) => `EXP: ${p.currentExp}/${p.maxExp}`,
+    (p: Player) => `HP:  ${p.health}/${p.stats.HP}`,
+    (p: Player) => `STR: ${p.stats.STR}`,
+    (p: Player) => `DEF: ${p.stats.DEF}`,
+    (p: Player) => `ACC: ${p.stats.ACC}`,
+    (p: Player) => `---`,
+    (p: Player) => `---`,
+]
+
 class Menu {
-    readonly height: number
-    readonly width: number
     readonly borderSize: number
-    readonly optionSpacing: number
     readonly headerSpacing: number
-    readonly position: Vector2
+    readonly optionSpacing: number
+    readonly statSpacing: number
+
+    readonly menuHeight: number
+    readonly menuWidth: number
+    readonly menuPosition: Vector2
+
+    readonly statsHeight: number
+    readonly statsWidth: number
+    readonly statsPosition: Vector2
 
     readonly miniMapHeight: number
     readonly miniMapWidth: number
@@ -61,22 +78,32 @@ class Menu {
                 prev: this.prevEffect,
                 select: this.nextEffect
             },
+            // {
+            //     title: '---',
+            //     getValue: () => '---',
+            //     next: () => {},
+            //     prev: () => {},
+            //     select: () => {}
+            // },
         ]
 
         this.borderSize = 14
         this.optionSpacing = 100
         this.headerSpacing = 70
-        this.height = 20 + (this.borderSize * 2) + this.headerSpacing + (this.options.length * this.optionSpacing)
-        this.width = 300 + (this.borderSize * 2)
-        // this.position = new Vector2(
-        //     (CNV.width - this.width) / 2,
-        //     (CNV.height - this.height) / 2
-        // )
-        this.position = new Vector2(GRID_SIZE, GRID_SIZE)
 
-        this.miniMapHeight = CNV.height - GRID_SIZE * 5
-        this.miniMapWidth = CNV.width - (GRID_SIZE * 3 + this.width)
-        this.miniMapPosition = new Vector2(GRID_SIZE * 2 + this.width, GRID_SIZE)
+        this.menuHeight = (this.borderSize * 2) + this.headerSpacing + (this.options.length * this.optionSpacing)
+        this.menuWidth = 300 + (this.borderSize * 2)
+        this.menuPosition = new Vector2(GRID_SIZE, GRID_SIZE)
+
+        // TODO: Remove the + 10 when the bottom ui is 3 * GRID_SIZE height
+        this.miniMapHeight = CNV.height - GRID_SIZE * 5 + 10
+        this.miniMapWidth = CNV.width - (GRID_SIZE * 3 + this.menuWidth)
+        this.miniMapPosition = new Vector2(GRID_SIZE * 2 + this.menuWidth, GRID_SIZE)
+
+        this.statSpacing = (this.miniMapHeight - ((this.borderSize * 2) + this.headerSpacing + this.menuHeight + GRID_SIZE)) / statMap.length
+        this.statsHeight = (this.borderSize * 2) + this.headerSpacing + (this.statSpacing * statMap.length)
+        this.statsWidth = 300 + (this.borderSize * 2)
+        this.statsPosition = new Vector2(GRID_SIZE, GRID_SIZE * 2 + this.menuHeight)
     }
 
     handleInput = (event: InputEvent) => {
@@ -91,46 +118,39 @@ class Menu {
         }
     }
 
-    draw = () => {
+    draw = (map: Map, player: Player) => {
+        this.drawMenu()
+        this.drawPlayerStats(player)
+
+        // TODO: Check if player has map
+        // if (player.inventory.maps.includes(map.title)) this.drawMiniMap(map, player)
+        this.drawMiniMap(map, player)
+    }
+
+    private drawMenu = () => {
         // Border
         CTX.fillStyle = this.themeManager.getColors().high
-        CTX.fillRect(this.position.x, this.position.y, this.width, this.height)
+        CTX.fillRect(this.menuPosition.x, this.menuPosition.y, this.menuWidth, this.menuHeight)
 
         // Background
         CTX.fillStyle = this.themeManager.getColors().low
         CTX.fillRect(
-            this.position.x + this.borderSize,
-            this.position.y + this.borderSize,
-            this.width - this.borderSize * 2,
-            this.height - this.borderSize * 2,
-        )
-
-        // Draw command text
-        CTX.fillStyle = this.themeManager.getColors().low
-        CTX.fillRect(
-            this.position.x + this.width / 2 - 60,
-            this.position.y + this.height - this.borderSize,
-            120,
-            this.borderSize,
-        )
-
-        CTX.font = `20px Andale Mono`
-        CTX.textAlign = 'center'
-        CTX.textBaseline = 'middle'
-        CTX.fillStyle = this.themeManager.getColors().accent
-        CTX.fillText(
-            '[ space ]',
-            this.position.x + this.width / 2,
-            this.position.y + this.height - 10
+            this.menuPosition.x + this.borderSize,
+            this.menuPosition.y + this.borderSize,
+            this.menuWidth - this.borderSize * 2,
+            this.menuHeight - this.borderSize * 2,
         )
 
         // Draw Header
         CTX.font = `28px Andale Mono`
+        CTX.textAlign = 'center'
+        CTX.textBaseline = 'middle'
+        CTX.fillStyle = this.themeManager.getColors().accent
 
         CTX.fillText(
             '- Menu -',
-            this.position.x + this.width / 2,
-            this.position.y + this.borderSize + this.headerSpacing / 2
+            this.menuPosition.x + this.menuWidth / 2,
+            this.menuPosition.y + this.borderSize + this.headerSpacing / 2
         )
 
         // Draw options
@@ -141,28 +161,66 @@ class Menu {
             CTX.fillStyle = this.themeManager.getColors().accent
             CTX.fillText(
                 option.title,
-                this.position.x + this.borderSize + 45,
-                this.position.y + this.borderSize + this.headerSpacing + 20 + (idx * this.optionSpacing)
+                this.menuPosition.x + this.borderSize + 45,
+                this.menuPosition.y + this.borderSize + this.headerSpacing + 20 + (idx * this.optionSpacing)
             )
             // Value
             CTX.fillStyle = this.themeManager.getColors().high
             CTX.fillText(
                 option.getValue(),
-                this.position.x + this.borderSize + 85,
-                this.position.y + this.borderSize + this.headerSpacing + 60 + (idx * this.optionSpacing)
+                this.menuPosition.x + this.borderSize + 85,
+                this.menuPosition.y + this.borderSize + this.headerSpacing + 60 + (idx * this.optionSpacing)
             )
         })
 
         // Draw cursor
         CTX.fillRect(
-            this.position.x + this.borderSize + 22,
-            this.position.y + this.borderSize + this.headerSpacing + 11 + (this.cursorIndex * this.optionSpacing),
+            this.menuPosition.x + this.borderSize + 22,
+            this.menuPosition.y + this.borderSize + this.headerSpacing + 11 + (this.cursorIndex * this.optionSpacing),
             12.5,
             12.5
         )
     }
 
-    drawMiniMap = (map: Map, player: Player) => {
+    private drawPlayerStats = (player: Player) => {
+        // Border
+        CTX.fillStyle = this.themeManager.getColors().high
+        CTX.fillRect(this.statsPosition.x, this.statsPosition.y, this.statsWidth, this.statsHeight)
+
+        // Background
+        CTX.fillStyle = this.themeManager.getColors().low
+        CTX.fillRect(
+            this.statsPosition.x + this.borderSize,
+            this.statsPosition.y + this.borderSize,
+            this.statsWidth - this.borderSize * 2,
+            this.statsHeight - this.borderSize * 2,
+        )
+
+        // Draw Header
+        CTX.font = `28px Andale Mono`
+        CTX.textAlign = 'center'
+        CTX.textBaseline = 'middle'
+        CTX.fillStyle = this.themeManager.getColors().accent
+        CTX.fillText(
+            '- Stats -',
+            this.statsPosition.x + this.statsWidth / 2,
+            this.statsPosition.y + this.borderSize + this.headerSpacing / 2
+        )
+
+        // Draw stats
+        CTX.textAlign = 'left'
+        CTX.textBaseline = 'top'
+        CTX.fillStyle = this.themeManager.getColors().high
+        statMap.forEach((statText, idx) => {
+            CTX.fillText(
+                statText(player),
+                this.statsPosition.x + this.borderSize + 45,
+                this.statsPosition.y + this.borderSize + this.headerSpacing + (idx * this.statSpacing)
+            )
+        })
+    }
+
+    private drawMiniMap = (map: Map, player: Player) => {
         // Border
         CTX.fillStyle = this.themeManager.getColors().high
         CTX.fillRect(this.miniMapPosition.x, this.miniMapPosition.y, this.miniMapWidth, this.miniMapHeight)
@@ -192,8 +250,6 @@ class Menu {
         map.data.forEach((row, y) => {
             row.forEach((cell, x) => {
                 if (cell === null) return
-                // TODO: If player doesn't have in game map
-                // if (!map.seenMap[`${x},${y}`]) return
 
                 // Draw everything
                 switch (cell) {
