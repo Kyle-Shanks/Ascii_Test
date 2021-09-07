@@ -155,6 +155,7 @@ const getRoomToInsert = (
     return !skip ? new Room(insertRoomInfo, insertRoom.position.subtract(dir)) : null
 }
 
+// TODO: Clean this up and split this into smaller functions
 export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     const map: MapData = Array(size).fill(0).map(_num => Array(size).fill(_))
     const rooms: Room[] = []
@@ -278,80 +279,72 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
                 continue
             }
 
+            let gatePos: Vector2 | null = null
+
             // Add gate between rooms
             if (room.position.x + room.width - 1 === checkRoom.position.x) {
                 // connected on the right
                 if (
                     room.position.y >= checkRoom.position.y
                     && room.position.y < checkRoom.position.y + checkRoom.height - 3
-                    && map[room.position.y + 2][checkRoom.position.x + 1] !== MAP_NUM.WALL
                 ) {
-                    map[room.position.y + 2][checkRoom.position.x] = MAP_NUM.GATE
-                    roomTree[room.id].push(checkRoom.id)
-                    roomTree[checkRoom.id].push(room.id)
+                    gatePos = new Vector2(checkRoom.position.x, room.position.y + 2)
                 } else if (
                     checkRoom.position.y >= room.position.y
                     && checkRoom.position.y < room.position.y + room.height - 3
-                    && map[checkRoom.position.y + 2][checkRoom.position.x + 1] !== MAP_NUM.WALL
                 ) {
-                    map[checkRoom.position.y + 2][checkRoom.position.x] = MAP_NUM.GATE
-                    roomTree[room.id].push(checkRoom.id)
-                    roomTree[checkRoom.id].push(room.id)
+                    gatePos = new Vector2(checkRoom.position.x, checkRoom.position.y + 2)
                 }
             } else if (room.position.x === checkRoom.position.x + checkRoom.width - 1) {
                 // connected on the left
                 if (
                     room.position.y >= checkRoom.position.y
                     && room.position.y < checkRoom.position.y + checkRoom.height - 3
-                    && map[room.position.y + 2][room.position.x - 1] !== MAP_NUM.WALL
                 ) {
-                    map[room.position.y + 2][room.position.x] = MAP_NUM.GATE
-                    roomTree[room.id].push(checkRoom.id)
-                    roomTree[checkRoom.id].push(room.id)
+                    gatePos = new Vector2(room.position.x, room.position.y + 2)
                 } else if (
                     checkRoom.position.y >= room.position.y
                     && checkRoom.position.y < room.position.y + room.height - 3
-                    && map[checkRoom.position.y + 2][room.position.x - 1] !== MAP_NUM.WALL
                 ) {
-                    map[checkRoom.position.y + 2][room.position.x] = MAP_NUM.GATE
-                    roomTree[room.id].push(checkRoom.id)
-                    roomTree[checkRoom.id].push(room.id)
+                    gatePos = new Vector2(room.position.x, checkRoom.position.y + 2)
                 }
             } else if (room.position.y + room.height - 1 === checkRoom.position.y) {
                 // connected on the bottom
                 if (
                     room.position.x >= checkRoom.position.x
                     && room.position.x < checkRoom.position.x + checkRoom.width - 3
-                    && map[checkRoom.position.y + 1][room.position.x + 2] !== MAP_NUM.WALL
                 ) {
-                    map[checkRoom.position.y][room.position.x + 2] = MAP_NUM.GATE
-                    roomTree[room.id].push(checkRoom.id)
-                    roomTree[checkRoom.id].push(room.id)
+                    gatePos = new Vector2(room.position.x + 2, checkRoom.position.y)
                 } else if (
                     checkRoom.position.x >= room.position.x
                     && checkRoom.position.x < room.position.x + room.width - 3
-                    && map[checkRoom.position.y + 1][checkRoom.position.x + 2] !== MAP_NUM.WALL
                 ) {
-                    map[checkRoom.position.y][checkRoom.position.x + 2] = MAP_NUM.GATE
-                    roomTree[room.id].push(checkRoom.id)
-                    roomTree[checkRoom.id].push(room.id)
+                    gatePos = new Vector2(checkRoom.position.x + 2, checkRoom.position.y)
                 }
             } else if (room.position.y === checkRoom.position.y + checkRoom.height - 1) {
                 // connected on the top
                 if (
                     room.position.x >= checkRoom.position.x
                     && room.position.x < checkRoom.position.x + checkRoom.width - 3
-                    && map[room.position.y - 1][room.position.x + 2] !== MAP_NUM.WALL
                 ) {
-                    map[room.position.y][room.position.x + 2] = MAP_NUM.GATE
-                    roomTree[room.id].push(checkRoom.id)
-                    roomTree[checkRoom.id].push(room.id)
+                    gatePos = new Vector2(room.position.x + 2, room.position.y)
                 } else if (
                     checkRoom.position.x >= room.position.x
                     && checkRoom.position.x < room.position.x + room.width - 3
-                    && map[room.position.y - 1][checkRoom.position.x + 2] !== MAP_NUM.WALL
                 ) {
-                    map[room.position.y][checkRoom.position.x + 2] = MAP_NUM.GATE
+                    gatePos = new Vector2(checkRoom.position.x + 2, room.position.y)
+                }
+            }
+
+            if (gatePos) {
+                const wallCount = gatePos.getAdjacent().reduce((acc, pos) => {
+                    if (map[pos.y][pos.x] === MAP_NUM.WALL) acc++
+                    return acc
+                }, 0)
+
+                // Should always be 2 walls adjacent to gate
+                if (wallCount === 2) {
+                    map[gatePos.y][gatePos.x] = MAP_NUM.GATE
                     roomTree[room.id].push(checkRoom.id)
                     roomTree[checkRoom.id].push(room.id)
                 }
@@ -408,13 +401,6 @@ export const generateMap = (size: MapSize = MAP_SIZE.S): MapInfo => {
     // Add portal in furthest room
     map[furthestRoom.spawnPoint.y][furthestRoom.spawnPoint.x] = MAP_NUM.PORTAL
 
-    // console.log({
-    //     keyCount,
-    //     rooms: rooms.length,
-    //     lockedRooms: lockedRoomIds.length,
-    //     loneRooms: loneRooms.length,
-    // })
-
     return {
         size,
         enemies,
@@ -429,6 +415,26 @@ const mapData: MapInfo[] = [
     generateMap(MAP_SIZE.XS),
     generateMap(MAP_SIZE.S),
     generateMap(MAP_SIZE.S),
+    // {
+    //     title: 'Shop',
+    //     size: MAP_SIZE.XS,
+    //     startPosition: new Vector2(3,8),
+    //     enemies: [],
+    //     data: [
+    //         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,0,_,_,0,_,_,0,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,4,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,0],
+    //         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    //     ],
+    // },
     generateMap(MAP_SIZE.M),
     generateMap(MAP_SIZE.M),
     generateMap(MAP_SIZE.L),

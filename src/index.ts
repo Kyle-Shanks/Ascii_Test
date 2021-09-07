@@ -10,8 +10,6 @@ import mapData from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import { CAMERA, EVENT_MANAGER, INPUT, LOG_MANAGER, THEME_MANAGER, MENU, EFFECT_MANAGER } from 'src/globals'
 
-let isMenuOpen = false
-
 let lightMap: Record<string, boolean> = {}
 let currentMap: number = 0
 let MAP: Map = new Map(mapData[currentMap])
@@ -199,7 +197,7 @@ const draw = () => {
     PLAYER.draw()
     drawLight(lightMap)
     drawUI()
-    if (isMenuOpen) MENU.draw(MAP, PLAYER)
+    if (MENU.isOpen) MENU.draw(MAP, PLAYER)
 }
 
 // Watch Input
@@ -209,12 +207,12 @@ class InputWatcher implements InputObserver {
     update = (event: InputEvent) => {
         // Toggle menu
         if (event.type === 'press' && event.key === 'Space') {
-            isMenuOpen = !isMenuOpen
+            MENU.toggleOpen()
             draw()
             return
         }
 
-        if (isMenuOpen) {
+        if (MENU.isOpen) {
             MENU.handleInput(event)
             draw()
         } else {
@@ -296,7 +294,7 @@ const init = () => {
 }
 
 const frame = () => {
-    if (!isMenuOpen) {
+    if (!MENU.isOpen) {
         CAMERA.update()
         draw()
     }

@@ -23,6 +23,15 @@ type MenuOption = {
 const themeArr = Object.values(THEME)
 const effectArr = Object.values(EFFECT)
 
+const miniMapSizes: Record<MapSize, number> = {
+    [MAP_SIZE.XS]: 28,
+    [MAP_SIZE.S]: 20,
+    [MAP_SIZE.M]: 14,
+    [MAP_SIZE.L]: 10,
+    [MAP_SIZE.XL]: 7, // Or 7.5
+    [MAP_SIZE.XXL]: 5
+}
+
 const statMap = [
     (p: Player) => `LVL: ${p.level}`,
     (p: Player) => `EXP: ${p.currentExp}/${p.maxExp}`,
@@ -58,7 +67,10 @@ class Menu {
     private cursorIndex: number
     private options: MenuOption[]
 
+    isOpen: boolean
+
     constructor(props: MenuProps) {
+        this.isOpen = false
         this.themeManager = props.themeManager
         this.effectManager = props.effectManager
 
@@ -105,6 +117,8 @@ class Menu {
         this.statsWidth = 300 + (this.borderSize * 2)
         this.statsPosition = new Vector2(GRID_SIZE, GRID_SIZE * 2 + this.menuHeight)
     }
+
+    toggleOpen = () => this.isOpen = !this.isOpen
 
     handleInput = (event: InputEvent) => {
         if (event.type === 'press') {
@@ -234,17 +248,17 @@ class Menu {
             this.miniMapHeight - this.borderSize * 2,
         )
 
-        const miniMapSizes: Record<MapSize, number> = {
-            [MAP_SIZE.XS]: 28,
-            [MAP_SIZE.S]: 20,
-            [MAP_SIZE.M]: 14,
-            [MAP_SIZE.L]: 10,
-            [MAP_SIZE.XL]: 7, // Or 7.5
-            [MAP_SIZE.XXL]: 5
-        }
+        const mapSize = miniMapSizes[map.size]
+        const mapWidth = mapSize * map.data[0].length
+        const mapHeight = mapSize * map.data.length
+        const mapPos = this.miniMapPosition.add(new Vector2(
+            (this.miniMapWidth - mapWidth) / 2,
+            (this.miniMapHeight - mapHeight) / 2
+        ))
 
-        const mapPos = this.miniMapPosition.add(new Vector2(GRID_SIZE * 1.5, GRID_SIZE * 1.5))
-        const miniMapSize = miniMapSizes[map.size]
+        CTX.strokeStyle = this.themeManager.getColors().low
+        CTX.lineWidth = 2
+        CTX.strokeRect(mapPos.x, mapPos.y, mapWidth, mapHeight)
 
         // Draw visible map
         map.data.forEach((row, y) => {
@@ -273,10 +287,10 @@ class Menu {
                 }
 
                 CTX.fillRect(
-                    mapPos.x + x * miniMapSize,
-                    mapPos.y + y * miniMapSize,
-                    miniMapSize,
-                    miniMapSize,
+                    mapPos.x + x * mapSize,
+                    mapPos.y + y * mapSize,
+                    mapSize,
+                    mapSize,
                 )
             })
         })
@@ -284,10 +298,10 @@ class Menu {
         // Draw player position
         CTX.fillStyle = this.themeManager.getColors().pop
         CTX.fillRect(
-            mapPos.x + player.position.x * miniMapSize,
-            mapPos.y + player.position.y * miniMapSize,
-            miniMapSize,
-            miniMapSize,
+            mapPos.x + player.position.x * mapSize,
+            mapPos.y + player.position.y * mapSize,
+            mapSize,
+            mapSize,
         )
     }
 
