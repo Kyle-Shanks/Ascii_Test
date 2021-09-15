@@ -1,4 +1,4 @@
-import { InputEvent, InputObserver } from 'src/classes/input'
+import { Button, InputEvent, InputObserver, InputType } from 'src/classes/input'
 import Map from 'src/classes/map'
 import Enemy from 'src/classes/entities/enemy'
 import { EFFECT } from 'src/classes/effectManager'
@@ -206,7 +206,7 @@ class InputWatcher implements InputObserver {
 
     update = (event: InputEvent) => {
         // Toggle menu
-        if (event.type === 'press' && event.key === 'Space') {
+        if (event.type === InputType.PRESS && event.button === Button.START) {
             MENU.toggleOpen()
             draw()
             return
@@ -223,7 +223,7 @@ class InputWatcher implements InputObserver {
 
 const inputWatcher = new InputWatcher()
 INPUT.subscribe(inputWatcher)
-INPUT.listen()
+INPUT.start()
 
 // Game event handlers
 const checkForDeadEnemies = () => {

@@ -1,7 +1,7 @@
 import Actor, { ActorProps } from 'src/classes/entities/actor'
 import Enemy from 'src/classes/entities/enemy'
 import Entity from 'src/classes/entities/entity'
-import { InputEvent, InputKey } from 'src/classes/input'
+import { Button, InputEvent, InputType } from 'src/classes/input'
 import EventManager, { GAME_EVENT_TYPE } from 'src/classes/eventManager'
 import LogManager from 'src/classes/logManager'
 import Map from 'src/classes/map'
@@ -13,17 +13,12 @@ interface PlayerProps extends ActorProps {
     // Any player specific props go here
 }
 
-type ActionMap = Record<InputKey, (map: Map, enemies: Enemy[]) => void>
-
 type Inventory = {
     [ENTITY_TYPES.GOLD]: number
     [ENTITY_TYPES.KEY]: number
 }
 
 class Player extends Actor {
-    private _pressActionMap: ActionMap
-    private _releaseActionMap: ActionMap
-
     currentExp: number
     maxExp: number
     level: number
@@ -41,34 +36,17 @@ class Player extends Actor {
             [ENTITY_TYPES.GOLD]: 0,
             [ENTITY_TYPES.KEY]: 0,
         }
-
-        this._pressActionMap = {
-            'W': (map: Map, enemies: Enemy[]) => this._walk(Vector2.UP, map, enemies),
-            'A': (map: Map, enemies: Enemy[]) => this._walk(Vector2.LEFT, map, enemies),
-            'S': (map: Map, enemies: Enemy[]) => this._walk(Vector2.DOWN, map, enemies),
-            'D': (map: Map, enemies: Enemy[]) => this._walk(Vector2.RIGHT, map, enemies),
-            'Shift': () => {},
-            'Space': () => {},
-            'J': (map: Map, enemies: Enemy[]) => this._interact(map, enemies),
-            'K': () => {},
-        }
-        this._releaseActionMap = {
-            'W': () => {},
-            'A': () => {},
-            'S': () => {},
-            'D': () => {},
-            'Shift': () => {},
-            'Space': () => {},
-            'J': () => {},
-            'K': () => {},
-        }
     }
 
     handleInput = (event: InputEvent, map: Map, enemies: Enemy[]) => {
-        if (event.type === 'press') {
-            this._pressActionMap[event.key](map, enemies)
-        } else if (event.type === 'release') {
-            this._releaseActionMap[event.key](map, enemies)
+        if (event.type === InputType.PRESS) {
+            switch (event.button) {
+                case Button.UP: return this._walk(Vector2.UP, map, enemies)
+                case Button.DOWN: return this._walk(Vector2.DOWN, map, enemies)
+                case Button.LEFT: return this._walk(Vector2.LEFT, map, enemies)
+                case Button.RIGHT: return this._walk(Vector2.RIGHT, map, enemies)
+                case Button.A: return this._interact(map, enemies)
+            }
         }
     }
 

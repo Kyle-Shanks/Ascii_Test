@@ -1,7 +1,7 @@
 import Camera from 'src/classes/camera'
 import EffectManager from 'src/classes/effectManager'
 import EventManager from 'src/classes/eventManager'
-import Input from 'src/classes/input'
+import InputManager from 'src/classes/input'
 import LogManager from 'src/classes/logManager'
 import Menu from 'src/classes/menu'
 import ThemeManager from 'src/classes/theme'
@@ -9,8 +9,8 @@ import ThemeManager from 'src/classes/theme'
 // Global Camera class
 export const CAMERA = new Camera()
 
-// Global input class
-export const INPUT = new Input()
+// Global Input Manager
+export const INPUT = new InputManager()
 
 // Global Theme Manager
 export const THEME_MANAGER = new ThemeManager()

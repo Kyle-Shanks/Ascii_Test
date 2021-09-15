@@ -3,7 +3,7 @@ import { MAP_NUM, MAP_SIZE, MapSize } from 'src/core/mapData'
 import { Vector2 } from 'src/core/types'
 import EffectManager, { EFFECT } from 'src/classes/effectManager'
 import Player from 'src/classes/entities/player'
-import { InputEvent } from 'src/classes/input'
+import { Button, InputEvent, InputType } from 'src/classes/input'
 import Map from 'src/classes/map'
 import ThemeManager, { THEME } from 'src/classes/theme'
 
@@ -121,13 +121,13 @@ class Menu {
     toggleOpen = () => this.isOpen = !this.isOpen
 
     handleInput = (event: InputEvent) => {
-        if (event.type === 'press') {
-            switch (event.key) {
-                case 'W': return this.cursorUp()
-                case 'A': return this.options[this.cursorIndex].prev()
-                case 'S': return this.cursorDown()
-                case 'D': return this.options[this.cursorIndex].next()
-                case 'J': return this.options[this.cursorIndex].select()
+        if (event.type === InputType.PRESS) {
+            switch (event.button) {
+                case Button.UP: return this.cursorUp()
+                case Button.DOWN: return this.cursorDown()
+                case Button.LEFT: return this.options[this.cursorIndex].prev()
+                case Button.RIGHT: return this.options[this.cursorIndex].next()
+                case Button.A: return this.options[this.cursorIndex].select()
             }
         }
     }
